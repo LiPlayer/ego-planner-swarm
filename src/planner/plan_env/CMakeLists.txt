@@ -20,6 +20,7 @@ find_package(std_msgs REQUIRED)
 find_package(visualization_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
+find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(message_filters REQUIRED)
 
@@ -58,7 +59,7 @@ add_library( plan_env SHARED
     src/obj_predictor.cpp 
     )
 
-ament_target_dependencies(plan_env std_msgs visualization_msgs geometry_msgs nav_msgs rclcpp Eigen3 PCL cv_bridge message_filters pcl_conversions)
+ament_target_dependencies(plan_env std_msgs visualization_msgs geometry_msgs nav_msgs sensor_msgs rclcpp Eigen3 PCL cv_bridge message_filters pcl_conversions)
 
 target_link_libraries( plan_env 
   ${PCL_LIBRARIES}
@@ -68,7 +69,7 @@ target_link_libraries( plan_env
 add_executable(obj_generator
     src/obj_generator.cpp 
 )
-ament_target_dependencies(obj_generator std_msgs visualization_msgs geometry_msgs nav_msgs rclcpp Eigen3 PCL cv_bridge message_filters pcl_conversions)
+ament_target_dependencies(obj_generator std_msgs visualization_msgs geometry_msgs nav_msgs sensor_msgs rclcpp Eigen3 PCL cv_bridge message_filters pcl_conversions)
 
 install(TARGETS plan_env
         DESTINATION lib
