@@ -1,7 +1,7 @@
 import os
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
 
 def generate_launch_description():
@@ -47,6 +47,7 @@ def generate_launch_description():
     obj_num_set = LaunchConfiguration('obj_num_set', default=10)
     
     drone_id = LaunchConfiguration('drone_id', default=0)
+    topic_prefix = LaunchConfiguration('topic_prefix', default='')
 
     # DeclareLaunchArguments
     map_size_x_arg = DeclareLaunchArgument('map_size_x_', default_value=map_size_x, description='Map size along X')
@@ -85,6 +86,7 @@ def generate_launch_description():
     use_distinctive_trajs_arg = DeclareLaunchArgument('use_distinctive_trajs', default_value=use_distinctive_trajs, description='Use distinctive trajectories')
     obj_num_set_arg = DeclareLaunchArgument('obj_num_set', default_value=obj_num_set, description='Number of objects')
     drone_id_arg = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
+    topic_prefix_arg = DeclareLaunchArgument('topic_prefix', default_value=topic_prefix, description='Topic prefix for namespacing planner IO')
 
     # Ego Planner Node
     ego_planner_node = Node(
@@ -93,23 +95,25 @@ def generate_launch_description():
         name=['drone_', drone_id, '_ego_planner_node'],
         output='screen',
         remappings=[
-            ('odom_world', ['drone_', drone_id, '_', odometry_topic]),
-            ('planning/bspline', ['drone_', drone_id, '_planning/bspline']),
-            ('planning/data_display', ['drone_', drone_id, '_planning/data_display']),
+            # Inputs
+            ('odom_world', [topic_prefix, odometry_topic]),               # odometry into planner
+            ('grid_map/cloud', [topic_prefix, cloud_topic]),              # point cloud input
+            ('grid_map/pose', [topic_prefix, camera_pose_topic]),         # camera pose
+            ('grid_map/depth', [topic_prefix, depth_topic]),              # depth image
+            ('grid_map/occupancy_inflate', [topic_prefix, 'grid/grid_map/occupancy_inflate']),
+
+            # Outputs
+            ('planning/bspline', [topic_prefix, 'planning/bspline']),
+            ('planning/data_display', [topic_prefix, 'planning/data_display']),
+            ('goal_point', [topic_prefix, 'plan_vis/goal_point']),
+            ('global_list', [topic_prefix, 'plan_vis/global_list']),
+            ('init_list', [topic_prefix, 'plan_vis/init_list']),
+            ('optimal_list', [topic_prefix, 'plan_vis/optimal_list']),
+            ('a_star_list', [topic_prefix, 'plan_vis/a_star_list']),
+
+            # Global coordination channels (stay un-namespaced)
             ('planning/broadcast_bspline_from_planner', '/broadcast_bspline'),
             ('planning/broadcast_bspline_to_planner', '/broadcast_bspline'),
-            
-            ('goal_point', ['drone_', drone_id, '_plan_vis/goal_point']),
-            ('global_list', ['drone_', drone_id, '_plan_vis/global_list']),
-            ('init_list', ['drone_', drone_id, '_plan_vis/init_list']),
-            ('optimal_list', ['drone_', drone_id, '_plan_vis/optimal_list']),
-            ('a_star_list', ['drone_', drone_id, '_plan_vis/a_star_list']),
-            
-            ('grid_map/odom', ['drone_', drone_id, '_', odometry_topic]),
-            ('grid_map/cloud', ['drone_', drone_id, '_', cloud_topic]),
-            ('grid_map/pose', ['drone_', drone_id, '_', camera_pose_topic]),
-            ('grid_map/depth', ['drone_', drone_id, '_', depth_topic]),
-            ('grid_map/occupancy_inflate', ['drone_', drone_id, '_grid/grid_map/occupancy_inflate'])
         ],
         parameters=[
             {'fsm/flight_type': flight_type},
@@ -246,6 +250,7 @@ def generate_launch_description():
     ld.add_action(use_distinctive_trajs_arg)
     ld.add_action(obj_num_set_arg)
     ld.add_action(drone_id_arg)
+    ld.add_action(topic_prefix_arg)
 
 
     # Add Node

@@ -25,6 +25,7 @@ def generate_launch_description():
     min_dist = LaunchConfiguration('min_dist', default=1.0)
     odometry_topic = LaunchConfiguration('odometry_topic', default='visual_slam/odom')
     drone_id = LaunchConfiguration('drone_id', default=0)
+    topic_prefix = LaunchConfiguration('topic_prefix', default='')
 
     # DeclareLaunchArguments
     init_x_arg = DeclareLaunchArgument('init_x_', default_value=init_x, description='Initial X position')
@@ -39,6 +40,7 @@ def generate_launch_description():
     min_dist_arg = DeclareLaunchArgument('min_dist', default_value=min_dist, description='Minimum distance')
     odometry_topic_arg = DeclareLaunchArgument('odometry_topic', default_value=odometry_topic, description='Odometry topic')
     drone_id_arg = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
+    topic_prefix_arg = DeclareLaunchArgument('topic_prefix', default_value=topic_prefix, description='Topic prefix for simulator IO (empty for no prefix)')
     
     # 地图属性以及是否使用动力学仿真
     use_mockamap = LaunchConfiguration('use_mockamap', default=False) # map_generator or mockamap 
@@ -55,7 +57,7 @@ def generate_launch_description():
         name='random_forest',
         output='screen',
         remappings=[
-            ('odometry', odometry_topic)
+            ('odometry', [topic_prefix, odometry_topic])
         ],
         parameters=[
             {'map/x_size': map_size_x_},
@@ -114,10 +116,10 @@ def generate_launch_description():
                     {'simulator/init_state_y': init_y},
                     {'simulator/init_state_z': init_z}],
         
-        remappings=[('odom', ['drone_', drone_id, '_visual_slam/odom']),
-                    ('cmd', ['drone_', drone_id, '_so3_cmd']),
-                    ('force_disturbance', ['drone_', drone_id,'_force_disturbance']),
-                    ('moment_disturbance', ['drone_', drone_id,'_moment_disturbance'])],
+        remappings=[('odom', [topic_prefix, 'visual_slam/odom']),
+                    ('cmd', [topic_prefix, 'so3_cmd']),
+                    ('force_disturbance', [topic_prefix, 'force_disturbance']),
+                    ('moment_disturbance', [topic_prefix, 'moment_disturbance'])],
         condition = IfCondition(use_dynamic)
         ) 
     
@@ -148,11 +150,11 @@ def generate_launch_description():
                 gains_file,
                 corrections_file
             ],
-            remappings=[('odom', ['drone_', drone_id, '_visual_slam/odom']),
-                        ('position_cmd', ['drone_', drone_id, '_planning/pos_cmd']),
-                        ('motors', ['drone_', drone_id, '_motors']),
-                        ('corrections', ['drone_', drone_id, '_corrections']),
-                        ('so3_cmd', ['drone_', drone_id, '_so3_cmd'])],
+            remappings=[('odom', [topic_prefix, 'visual_slam/odom']),
+                        ('position_cmd', [topic_prefix, 'planning/pos_cmd']),
+                        ('motors', [topic_prefix, 'motors']),
+                        ('corrections', [topic_prefix, 'corrections']),
+                        ('so3_cmd', [topic_prefix, 'so3_cmd'])],
             condition = IfCondition(use_dynamic)
             )
     
@@ -179,8 +181,8 @@ def generate_launch_description():
             {'init_z': init_z}
         ],
         remappings=[
-            ('command', ['drone_', drone_id, '_planning/pos_cmd']),
-            ('odometry', ['drone_', drone_id, '_', odometry_topic])
+            ('command', [topic_prefix, 'planning/pos_cmd']),
+            ('odometry', [topic_prefix, odometry_topic])
         ],
         condition = UnlessCondition(use_dynamic)
     )
@@ -191,10 +193,10 @@ def generate_launch_description():
         name=['drone_', drone_id, '_odom_visualization'],
         output='screen',
         remappings=[
-            ('odom', ['drone_', drone_id, '_visual_slam/odom']),
-            ('robot', ['drone_', drone_id, '_vis/robot']),
-            ('path', ['drone_', drone_id, '_vis/path']),
-            ('time_gap', ['drone_', drone_id, '_vis/time_gap']),
+            ('odom', [topic_prefix, 'visual_slam/odom']),
+            ('robot', [topic_prefix, 'vis/robot']),
+            ('path', [topic_prefix, 'vis/path']),
+            ('time_gap', [topic_prefix, 'vis/time_gap']),
             # ('pose', ['drone_', drone_id, '_vis/pose']),
             # ('velocity', ['drone_', drone_id, '_vis/velocity']),
             # ('covariance', ['drone_', drone_id, '_vis/covariance']),
@@ -237,9 +239,9 @@ def generate_launch_description():
         ],
         remappings=[
             ('global_map', '/map_generator/global_cloud'),
-            ('odometry', ['drone_', drone_id, '_', odometry_topic]),
-            ('pcl_render_node/cloud', ['drone_', drone_id, '_pcl_render_node/cloud']),
-            ('depth', ['drone_', drone_id, '_pcl_render_node/depth'])
+            ('odometry', [topic_prefix, odometry_topic]),
+            ('pcl_render_node/cloud', [topic_prefix, 'pcl_render_node/cloud']),
+            ('depth', [topic_prefix, 'pcl_render_node/depth'])
         ]
     )
 
@@ -259,6 +261,7 @@ def generate_launch_description():
     ld.add_action(min_dist_arg)
     ld.add_action(odometry_topic_arg)
     ld.add_action(drone_id_arg)
+    ld.add_action(topic_prefix_arg)
     
     ld.add_action(use_mockamap_arg)
     ld.add_action(use_dynamic_arg)
