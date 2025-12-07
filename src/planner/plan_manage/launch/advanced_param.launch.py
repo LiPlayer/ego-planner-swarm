@@ -97,6 +97,7 @@ def generate_launch_description():
         remappings=[
             # Inputs
             ('odom_world', [topic_prefix, odometry_topic]),               # odometry into planner
+            ('grid_map/odom', [topic_prefix, odometry_topic]),            # odometry into grid map
             ('grid_map/cloud', [topic_prefix, cloud_topic]),              # point cloud input
             ('grid_map/pose', [topic_prefix, camera_pose_topic]),         # camera pose
             ('grid_map/depth', [topic_prefix, depth_topic]),              # depth image
