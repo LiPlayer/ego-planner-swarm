@@ -3,12 +3,15 @@
 
 #include <Eigen/Eigen>
 #include <Eigen/StdVector>
-#include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.hpp>
 #include <geometry_msgs/msg/pose_stamped.hpp>
 #include <iostream>
 #include <random>
 #include <nav_msgs/msg/odometry.hpp>
 #include <queue>
+#include <sensor_msgs/image_encodings.hpp>
+#include <sensor_msgs/msg/image.hpp>
+#include <sensor_msgs/msg/point_cloud2.hpp>
 #include <rclcpp/rclcpp.hpp>
 #include <tuple>
 #include <visualization_msgs/msg/marker.hpp>
