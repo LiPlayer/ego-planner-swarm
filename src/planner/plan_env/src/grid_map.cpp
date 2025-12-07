@@ -133,6 +133,10 @@ void GridMap::initMap(rclcpp::Node::SharedPtr node)
       0.0, -1.0, 0.0, 0.0,
       0.0, 0.0, 0.0, 1.0;
 
+  // Use Best Effort QoS for odom to match LIO-SAM/Unilidar publishers
+  auto odom_qos = rclcpp::QoS(rclcpp::KeepLast(100)).best_effort();
+  auto cloud_qos = rclcpp::QoS(rclcpp::KeepLast(10)).best_effort();
+
   /* init callback */
 
   // 初始化 message_filters::Subscriber
@@ -156,7 +160,7 @@ void GridMap::initMap(rclcpp::Node::SharedPtr node)
   else if (mp_.pose_type_ == ODOMETRY)
   {
     odom_sub_ = std::make_shared<message_filters::Subscriber<nav_msgs::msg::Odometry>>(
-        node_, "grid_map/odom", rclcpp::QoS(100).get_rmw_qos_profile());
+        node_, "grid_map/odom", odom_qos.get_rmw_qos_profile());
 
     sync_image_odom_ = std::make_shared<message_filters::Synchronizer<SyncPolicyImageOdom>>(
         SyncPolicyImageOdom(100), *depth_sub_, *odom_sub_);
@@ -166,10 +170,10 @@ void GridMap::initMap(rclcpp::Node::SharedPtr node)
 
   // 使用独立的里程计和点云订阅
   indep_cloud_sub_ = node_->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "grid_map/cloud", 10, std::bind(&GridMap::cloudCallback, this, std::placeholders::_1));
+      "grid_map/cloud", cloud_qos, std::bind(&GridMap::cloudCallback, this, std::placeholders::_1));
 
   indep_odom_sub_ = node_->create_subscription<nav_msgs::msg::Odometry>(
-      "grid_map/odom", 10, std::bind(&GridMap::odomCallback, this, std::placeholders::_1));
+      "grid_map/odom", odom_qos, std::bind(&GridMap::odomCallback, this, std::placeholders::_1));
 
   // 定时器
   occ_timer_ = node_->create_wall_timer(
