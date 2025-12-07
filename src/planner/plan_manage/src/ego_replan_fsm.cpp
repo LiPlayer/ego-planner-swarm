@@ -243,7 +243,10 @@ namespace ego_planner
 
     init_pt_ = odom_pos_;
 
-    Eigen::Vector3d end_wp(msg->pose.position.x, msg->pose.position.y, 1.0);
+    Eigen::Vector3d end_wp(msg->pose.position.x, msg->pose.position.y, msg->pose.position.z);
+
+    static int goal_vis_id = 10000; // separate id space for manual goals
+    visualization_->displayGoalPoint(end_wp, Eigen::Vector4d(1.0, 0.4, 0.0, 1.0), 0.3, goal_vis_id++);
 
     planNextWaypoint(end_wp);
   }
