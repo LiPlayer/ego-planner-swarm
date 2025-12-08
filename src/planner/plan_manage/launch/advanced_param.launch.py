@@ -101,7 +101,7 @@ def generate_launch_description():
             ('grid_map/cloud', [topic_prefix, cloud_topic]),              # point cloud input
             ('grid_map/pose', [topic_prefix, camera_pose_topic]),         # camera pose
             ('grid_map/depth', [topic_prefix, depth_topic]),              # depth image
-            ('grid_map/occupancy_inflate', [topic_prefix, 'grid/grid_map/occupancy_inflate']),
+            ('grid_map/occupancy_inflate', [topic_prefix, 'grid_map/occupancy_inflate']),
 
             # Outputs
             ('planning/bspline', [topic_prefix, 'planning/bspline']),
