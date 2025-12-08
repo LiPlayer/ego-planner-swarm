@@ -43,8 +43,8 @@ namespace ego_planner
     };
     enum TARGET_TYPE
     {
-      MANUAL_TARGET = 1,
-      PRESET_TARGET = 2,
+      SINGLE_TARGET = 1,  // single goal fed from /move_base_simple/goal
+      WAYPOINT_TARGET = 2, // preset waypoint list after /traj_start_trigger
       REFENCE_PATH = 3
     };
 
@@ -55,7 +55,7 @@ namespace ego_planner
     traj_utils::msg::MultiBsplines multi_bspline_msgs_buf_;
 
     /* parameters */
-    int target_type_; // 1 mannual select, 2 hard code
+    int target_type_; // 1 SINGLE_TARGET, 2 WAYPOINT_TARGET
     double no_replan_thresh_, replan_thresh_;
     double waypoints_[50][3];
     int waypoint_num_, wp_id_;
@@ -65,7 +65,7 @@ namespace ego_planner
     bool enable_fail_safe_;
 
     /* planning data */
-    bool have_trigger_, have_target_, have_odom_, have_new_target_, have_recv_pre_agent_;
+    bool have_waypoint_trigger_, have_target_, have_odom_, have_new_target_, have_recv_pre_agent_;
     FSM_EXEC_STATE exec_state_;
     int continously_called_times_{0};
 
@@ -84,11 +84,11 @@ namespace ego_planner
     rclcpp::Node::SharedPtr node_;
     rclcpp::TimerBase::SharedPtr exec_timer_, safety_timer_;
 
-    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr waypoint_sub_;
+    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr single_target_sub_;
     rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr odom_sub_;
     rclcpp::Subscription<traj_utils::msg::MultiBsplines>::SharedPtr swarm_trajs_sub_;
     rclcpp::Subscription<traj_utils::msg::Bspline>::SharedPtr broadcast_bspline_sub_;
-    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr trigger_sub_;
+    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr waypoint_trigger_sub_;
 
     // rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr replan_pub_;
     // rclcpp::Publisher<std_msgs::msg::Empty>::SharedPtr new_pub_;
@@ -108,15 +108,15 @@ namespace ego_planner
     std::pair<int, EGOReplanFSM::FSM_EXEC_STATE> timesOfConsecutiveStateCalls();
     void printFSMExecState();
 
-    void readGivenWps();
+    void loadPresetWaypoints();
     void planNextWaypoint(const Eigen::Vector3d next_wp);
     void getLocalTarget();
 
     /* ROS functions */
     void execFSMCallback();
     void checkCollisionCallback();
-    void waypointCallback(const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg);
-    void triggerCallback(const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg);
+    void singleTargetCallback(const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg);
+    void waypointTriggerCallback(const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg);
     void odometryCallback(const std::shared_ptr<const nav_msgs::msg::Odometry> &msg);
     void swarmTrajsCallback(const std::shared_ptr<const traj_utils::msg::MultiBsplines> &msg);
     void BroadcastBsplineCallback(const std::shared_ptr<const traj_utils::msg::Bspline> &msg);
