@@ -56,7 +56,7 @@ namespace ego_planner
 
     /* parameters */
     // Current mode: 1 SINGLE_TARGET, 2 WAYPOINT_TARGET (initialized from param, updated on latest request)
-    int target_type_;
+    int target_mode_;
     double no_replan_thresh_, replan_thresh_;
     double waypoints_[50][3];
     int waypoint_num_, wp_id_;
@@ -66,7 +66,7 @@ namespace ego_planner
     bool enable_fail_safe_;
 
     /* planning data */
-    bool have_waypoint_trigger_, have_target_, have_odom_, have_new_target_, have_recv_pre_agent_;
+    bool waypoint_triggered_, have_target_, have_odom_, have_new_target_, have_recv_pre_agent_;
     FSM_EXEC_STATE exec_state_;
     int continously_called_times_{0};
 
@@ -116,8 +116,8 @@ namespace ego_planner
     /* ROS functions */
     void execFSMCallback();
     void checkCollisionCallback();
-    void singleTargetCallback(const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg);
-    void waypointTriggerCallback(const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg);
+    void onSingleTarget(const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg);
+    void onWaypointTarget(const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg);
     void odometryCallback(const std::shared_ptr<const nav_msgs::msg::Odometry> &msg);
     void swarmTrajsCallback(const std::shared_ptr<const traj_utils::msg::MultiBsplines> &msg);
     void BroadcastBsplineCallback(const std::shared_ptr<const traj_utils::msg::Bspline> &msg);
