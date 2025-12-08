@@ -114,51 +114,42 @@ namespace ego_planner
     bspline_pub_ = node_->create_publisher<traj_utils::msg::Bspline>("planning/bspline", 10);
     data_disp_pub_ = node_->create_publisher<traj_utils::msg::DataDisp>("planning/data_display", 100);
 
-    if (target_type_ == TARGET_TYPE::SINGLE_TARGET)
+    // Always subscribe to both; whichever arrives last sets the current mode.
+    single_target_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
+        "/move_base_simple/goal",
+        1,
+        [this](const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg)
+        {
+          this->singleTargetCallback(msg);
+        });
+
+    waypoint_trigger_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
+        "/traj_start_trigger",
+        1,
+        [this](const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg)
+        {
+          this->waypointTriggerCallback(msg);
+        });
+
+    if (target_type_ == TARGET_TYPE::WAYPOINT_TARGET)
     {
-      single_target_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
-          "/move_base_simple/goal",
-          1,
-          [this](const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg)
-          {
-            this->singleTargetCallback(msg);
-          });
+      RCLCPP_WARN(node_->get_logger(), "Waypoint mode: waiting for /traj_start_trigger (or single target) to start planning.");
     }
-    else if (target_type_ == TARGET_TYPE::WAYPOINT_TARGET)
+    else if (target_type_ != TARGET_TYPE::SINGLE_TARGET)
     {
-      waypoint_trigger_sub_ = node_->create_subscription<geometry_msgs::msg::PoseStamped>(
-          "/traj_start_trigger",
-          1,
-          [this](const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg)
-          {
-            this->waypointTriggerCallback(msg);
-          });
-
-      RCLCPP_INFO(node_->get_logger(), "Wait for 1 second.");
-      int count = 0;
-      while (rclcpp::ok() && count++ < 1000)
-      {
-        rclcpp::spin_some(node_);
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      }
-
-      RCLCPP_WARN(node_->get_logger(), "Waiting for trigger from [n3ctrl] from RC");
-
-      while (rclcpp::ok() && (!have_odom_ || !have_waypoint_trigger_))
-      {
-        rclcpp::spin_some(node_);
-        std::this_thread::sleep_for(std::chrono::milliseconds(1));
-      }
-
-      loadPresetWaypoints();
-    }
-    else
       cout << "Wrong target_type_ value! target_type_=" << target_type_ << endl;
+    }
   }
 
   void EGOReplanFSM::loadPresetWaypoints()
 
   {
+    if (!have_odom_)
+    {
+      RCLCPP_WARN(node_->get_logger(), "Waypoint trigger received but odom not ready yet.");
+      return;
+    }
+
     if (waypoint_num_ <= 0)
     {
       RCLCPP_ERROR(node_->get_logger(), "Wrong waypoint_num_ = %d", waypoint_num_);
@@ -207,15 +198,10 @@ namespace ego_planner
       have_new_target_ = true;
 
       /*** FSM状态转换 ***/
-      if (exec_state_ == WAIT_TARGET)
+      if (exec_state_ == WAIT_TARGET || exec_state_ == INIT)
         changeFSMExecState(GEN_NEW_TRAJ, "TRIG");
       else
       {
-        while (exec_state_ != EXEC_TRAJ)
-        {
-          rclcpp::spin_some(node_);
-          std::this_thread::sleep_for(std::chrono::milliseconds(1));
-        }
         changeFSMExecState(REPLAN_TRAJ, "TRIG");
       }
 
@@ -229,15 +215,35 @@ namespace ego_planner
 
   void EGOReplanFSM::waypointTriggerCallback(const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg)
   {
+    (void)msg;
+    target_type_ = TARGET_TYPE::WAYPOINT_TARGET;
     have_waypoint_trigger_ = true;
     cout << "Waypoint route trigger received!" << endl;
     init_pt_ = odom_pos_;
+
+    if (have_odom_)
+    {
+      loadPresetWaypoints();
+    }
+    else
+    {
+      RCLCPP_WARN(node_->get_logger(), "Trigger received but odom not ready yet, will plan once odom arrives.");
+    }
   }
 
   void EGOReplanFSM::singleTargetCallback(const std::shared_ptr<const geometry_msgs::msg::PoseStamped> &msg)
   {
     if (msg->pose.position.z < -0.1)
       return;
+
+    target_type_ = TARGET_TYPE::SINGLE_TARGET;
+    have_waypoint_trigger_ = false;
+
+    if (!have_odom_)
+    {
+      RCLCPP_WARN(node_->get_logger(), "Single target received but odom not ready yet.");
+      return;
+    }
 
     cout << "Single target received!" << endl;
 
@@ -269,6 +275,11 @@ namespace ego_planner
     odom_orient_.z() = msg->pose.pose.orientation.z;
 
     have_odom_ = true;
+
+    if (target_type_ == TARGET_TYPE::WAYPOINT_TARGET && have_waypoint_trigger_ && !have_target_)
+    {
+      loadPresetWaypoints();
+    }
   }
 
   void EGOReplanFSM::BroadcastBsplineCallback(const std::shared_ptr<const traj_utils::msg::Bspline> &msg)
@@ -496,7 +507,8 @@ namespace ego_planner
 
     case WAIT_TARGET:
     {
-      if (!have_target_ || !have_waypoint_trigger_)
+      const bool ready = (target_type_ == TARGET_TYPE::WAYPOINT_TARGET) ? (have_target_ && have_waypoint_trigger_) : have_target_;
+      if (!ready)
         goto force_return;
       else
       {
@@ -509,7 +521,8 @@ namespace ego_planner
     {
       if (planner_manager_->pp_.drone_id <= 0 || (planner_manager_->pp_.drone_id >= 1 && have_recv_pre_agent_))
       {
-        if (have_odom_ && have_target_ && have_waypoint_trigger_)
+        bool trigger_ready = (target_type_ == TARGET_TYPE::WAYPOINT_TARGET) ? have_waypoint_trigger_ : true;
+        if (have_odom_ && have_target_ && trigger_ready)
         {
           bool success = planFromGlobalTraj(10); // zx-todo
           if (success)

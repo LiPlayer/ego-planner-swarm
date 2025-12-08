@@ -55,7 +55,8 @@ namespace ego_planner
     traj_utils::msg::MultiBsplines multi_bspline_msgs_buf_;
 
     /* parameters */
-    int target_type_; // 1 SINGLE_TARGET, 2 WAYPOINT_TARGET
+    // Current mode: 1 SINGLE_TARGET, 2 WAYPOINT_TARGET (initialized from param, updated on latest request)
+    int target_type_;
     double no_replan_thresh_, replan_thresh_;
     double waypoints_[50][3];
     int waypoint_num_, wp_id_;

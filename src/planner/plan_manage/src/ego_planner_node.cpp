@@ -15,6 +15,14 @@ int main(int argc, char **argv)
 
   rebo_replan.init(node);
 
+  // Ensure the node is not already marked as attached to an executor (can happen if spin_some was used earlier).
+  auto base = node->get_node_base_interface();
+  bool already_associated = base->get_associated_with_executor_atomic().exchange(false);
+  if (already_associated)
+  {
+    RCLCPP_WARN(node->get_logger(), "Resetting stale executor association before spinning.");
+  }
+
   rclcpp::spin(node);
   rclcpp::shutdown();
 
