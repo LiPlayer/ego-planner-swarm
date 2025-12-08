@@ -15,9 +15,10 @@ def generate_launch_description():
     drone_id = LaunchConfiguration('drone_id', default=0)
     topic_prefix = LaunchConfiguration('topic_prefix', default='')
     
+    # Use a slightly taller map to cover the height of the random_forest map (z_size=3.0) plus margin
     map_size_x = LaunchConfiguration('map_size_x', default = 50.0)
     map_size_y = LaunchConfiguration('map_size_y', default = 25.0)
-    map_size_z = LaunchConfiguration('map_size_z', default = 2.0)
+    map_size_z = LaunchConfiguration('map_size_z', default = 4.0)
     odom_topic = LaunchConfiguration('odom_topic', default = 'visual_slam/odom')
     
     
@@ -46,9 +47,9 @@ def generate_launch_description():
         name='random_forest',
         output='screen',
         parameters=[
-            {'map/x_size': 26.0},
-            {'map/y_size': 20.0},
-            {'map/z_size': 3.0},
+            {'map/x_size': map_size_x},
+            {'map/y_size': map_size_y},
+            {'map/z_size': map_size_z},
             {'map/resolution': 0.1},
             {'ObstacleShape/seed': 1.0},
             {'map/obs_num': 250},

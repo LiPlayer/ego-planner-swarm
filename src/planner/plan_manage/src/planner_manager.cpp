@@ -40,7 +40,19 @@ namespace ego_planner
     bspline_optimizer_->setParam(node);
     bspline_optimizer_->setEnvironment(grid_map_, obj_predictor_);
     bspline_optimizer_->a_star_.reset(new AStar);
-    bspline_optimizer_->a_star_->initGridMap(grid_map_, Eigen::Vector3i(100, 100, 100));
+
+    // size the A* grid to the actual occupancy grid instead of a hard-coded 100^3 pool
+    Eigen::Vector3d map_origin, map_size;
+    grid_map_->getRegion(map_origin, map_size);
+    const double map_resolution = grid_map_->getResolution();
+    Eigen::Vector3i pool_size = (map_size / map_resolution).array().ceil().cast<int>();
+    pool_size = pool_size.cwiseMax(Eigen::Vector3i::Ones());
+
+    // Add a small padding to absorb rounding when start/end sit on the boundary
+    const Eigen::Vector3i pool_padding = Eigen::Vector3i::Constant(6);
+    pool_size += pool_padding * 2;
+
+    bspline_optimizer_->a_star_->initGridMap(grid_map_, pool_size);
 
     visualization_ = vis;
   }
