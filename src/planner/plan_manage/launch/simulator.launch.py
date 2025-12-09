@@ -24,6 +24,7 @@ def generate_launch_description():
     p_num = LaunchConfiguration('p_num', default=20)
     min_dist = LaunchConfiguration('min_dist', default=1.0)
     odometry_topic = LaunchConfiguration('odometry_topic', default='visual_slam/odom')
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     drone_id = LaunchConfiguration('drone_id', default=0)
     topic_prefix = LaunchConfiguration('topic_prefix', default='')
 
@@ -39,6 +40,7 @@ def generate_launch_description():
     p_num_arg = DeclareLaunchArgument('p_num', default_value=p_num, description='Polygon number')
     min_dist_arg = DeclareLaunchArgument('min_dist', default_value=min_dist, description='Minimum distance')
     odometry_topic_arg = DeclareLaunchArgument('odometry_topic', default_value=odometry_topic, description='Odometry topic')
+    use_sim_time_arg = DeclareLaunchArgument('use_sim_time', default_value=use_sim_time, description='Use simulation time')
     drone_id_arg = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
     topic_prefix_arg = DeclareLaunchArgument('topic_prefix', default_value=topic_prefix, description='Topic prefix for simulator IO (empty for no prefix)')
     
@@ -63,6 +65,7 @@ def generate_launch_description():
             {'map/x_size': map_size_x_},
             {'map/y_size': map_size_y_},
             {'map/z_size': map_size_z_},
+            {'use_sim_time': use_sim_time},
             {'map/resolution': 0.1},
             {'ObstacleShape/seed': 1},
             {'map/obs_num': p_num},
@@ -95,6 +98,7 @@ def generate_launch_description():
             {'seed': 127},
             {'update_freq': 0.5},
             {'resolution': 0.1},
+            {'use_sim_time': use_sim_time},
             {'x_length': PythonExpression(['int(', map_size_x_, ')'])},
             {'y_length': PythonExpression(['int(', map_size_y_, ')'])},
             {'z_length': PythonExpression(['int(', map_size_z_, ')'])},
@@ -114,7 +118,8 @@ def generate_launch_description():
         parameters=[{'rate/odom': 100.0},
                     {'simulator/init_state_x': init_x},
                     {'simulator/init_state_y': init_y},
-                    {'simulator/init_state_z': init_z}],
+                    {'simulator/init_state_z': init_z},
+                    {'use_sim_time': use_sim_time}],
         
         remappings=[('odom', [topic_prefix, 'visual_slam/odom']),
                     ('cmd', [topic_prefix, 'so3_cmd']),
@@ -142,6 +147,7 @@ def generate_launch_description():
                 {'so3_control/init_state_x': init_x},
                 {'so3_control/init_state_y': init_y},
                 {'so3_control/init_state_z': init_z},
+                {'use_sim_time': use_sim_time},
                 {'mass': 0.98},
                 {'use_angle_corrections': False},
                 {'use_external_yaw': False},
@@ -178,7 +184,8 @@ def generate_launch_description():
         parameters=[
             {'init_x': init_x},
             {'init_y': init_y},
-            {'init_z': init_z}
+            {'init_z': init_z},
+            {'use_sim_time': use_sim_time}
         ],
         remappings=[
             ('command', [topic_prefix, 'planning/pos_cmd']),
@@ -262,6 +269,7 @@ def generate_launch_description():
     ld.add_action(odometry_topic_arg)
     ld.add_action(drone_id_arg)
     ld.add_action(topic_prefix_arg)
+    ld.add_action(use_sim_time_arg)
     
     ld.add_action(use_mockamap_arg)
     ld.add_action(use_dynamic_arg)

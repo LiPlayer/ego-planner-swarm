@@ -19,6 +19,7 @@ def generate_launch_description():
     target_z = LaunchConfiguration('target_z', default=1.0)
     drone_id = LaunchConfiguration('drone_id', default=0)
     odom_topic = LaunchConfiguration('odom_topic', default='visual_slam/odom')
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     obj_num = LaunchConfiguration('obj_num', default=10)
 
     # DeclareLaunchArgument definitions
@@ -33,6 +34,7 @@ def generate_launch_description():
     target_z_cmd = DeclareLaunchArgument('target_z', default_value=target_z, description='Target z position')
     drone_id_cmd = DeclareLaunchArgument('drone_id', default_value=drone_id, description='ID of the drone')
     odom_topic_cmd = DeclareLaunchArgument('odom_topic', default_value=odom_topic, description='Odometry topic')
+    use_sim_time_cmd = DeclareLaunchArgument('use_sim_time', default_value=use_sim_time, description='Use simulation time')
     obj_num_cmd = DeclareLaunchArgument('obj_num', default_value=obj_num, description='Number of moving objects')
 
     use_dynamic = LaunchConfiguration('use_dynamic', default=True)  
@@ -47,6 +49,7 @@ def generate_launch_description():
             'map_size_x_': map_size_x,
             'map_size_y_': map_size_y,
             'map_size_z_': map_size_z,
+            'use_sim_time': use_sim_time,
             'odometry_topic': odom_topic,
             'obj_num_set': obj_num,
             'camera_pose_topic': 'pcl_render_node/camera_pose',
@@ -75,6 +78,7 @@ def generate_launch_description():
             ('planning/bspline', ['drone_', drone_id, '_planning/bspline'])
         ],
         parameters=[
+            {'use_sim_time': use_sim_time},
             {'traj_server/time_forward': 1.0}
         ]
     )
@@ -91,7 +95,8 @@ def generate_launch_description():
             'init_x_': init_x,
             'init_y_': init_y,
             'init_z_': init_z,
-            'odometry_topic': odom_topic
+            'odometry_topic': odom_topic,
+            'use_sim_time': use_sim_time
         }.items()
     )
 
@@ -135,6 +140,7 @@ def generate_launch_description():
     ld.add_action(odom_topic_cmd)
     ld.add_action(obj_num_cmd)
     ld.add_action(use_dynamic_cmd)
+    ld.add_action(use_sim_time_cmd)
 
     # Add nodes and includes
     ld.add_action(advanced_param_include)

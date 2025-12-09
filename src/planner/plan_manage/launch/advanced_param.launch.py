@@ -12,6 +12,7 @@ def generate_launch_description():
     map_size_z = LaunchConfiguration('map_size_z_', default=5.0)
     
     odometry_topic = LaunchConfiguration('odometry_topic', default='odom')
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     camera_pose_topic = LaunchConfiguration('camera_pose_topic', default='camera_pose')
     depth_topic = LaunchConfiguration('depth_topic', default='depth_image')
     cloud_topic = LaunchConfiguration('cloud_topic', default='cloud')
@@ -38,6 +39,7 @@ def generate_launch_description():
     map_size_y_arg = DeclareLaunchArgument('map_size_y_', default_value=map_size_y, description='Map size along Y')
     map_size_z_arg = DeclareLaunchArgument('map_size_z_', default_value=map_size_z, description='Map size along Z')
     odometry_topic_arg = DeclareLaunchArgument('odometry_topic', default_value=odometry_topic, description='Odometry topic')
+    use_sim_time_arg = DeclareLaunchArgument('use_sim_time', default_value=use_sim_time, description='Use simulation time')
     camera_pose_topic_arg = DeclareLaunchArgument('camera_pose_topic', default_value=camera_pose_topic, description='Camera pose topic')
     depth_topic_arg = DeclareLaunchArgument('depth_topic', default_value=depth_topic, description='Depth topic')
     cloud_topic_arg = DeclareLaunchArgument('cloud_topic', default_value=cloud_topic, description='Point cloud topic')
@@ -99,6 +101,7 @@ def generate_launch_description():
             {'fsm/planning_horizon': planning_horizon},
             {'fsm/planning_horizen_time': 3.0},
             {'fsm/emergency_time': 1.0},
+            {'use_sim_time': use_sim_time},
             {'fsm/realworld_experiment': False},
             {'fsm/fail_safe': True},
             
@@ -181,6 +184,7 @@ def generate_launch_description():
     ld.add_action(camera_pose_topic_arg)
     ld.add_action(depth_topic_arg)
     ld.add_action(cloud_topic_arg)
+    ld.add_action(use_sim_time_arg)
     ld.add_action(cx_arg)
     ld.add_action(cy_arg)
     ld.add_action(fx_arg)

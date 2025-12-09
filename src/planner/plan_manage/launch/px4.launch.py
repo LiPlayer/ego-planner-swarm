@@ -15,6 +15,7 @@ def generate_launch_description():
     map_size_y = LaunchConfiguration('map_size_y', default=40.0)
     map_size_z = LaunchConfiguration('map_size_z', default=10.0)
 
+    use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     odom_topic = LaunchConfiguration('odom_topic', default='/lio_sam/mapping/odometry')
     cloud_topic = LaunchConfiguration('cloud_topic', default='/unilidar/cloud')
     camera_pose_topic = LaunchConfiguration('camera_pose_topic', default='camera_pose')
@@ -31,6 +32,7 @@ def generate_launch_description():
     map_size_z_arg = DeclareLaunchArgument('map_size_z', default_value=map_size_z, description='Map size along z')
     drone_id_arg = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
     topic_prefix_arg = DeclareLaunchArgument('topic_prefix', default_value=topic_prefix, description='Topic prefix for namespacing; leave empty to remove drone_id prefix')
+    use_sim_time_arg = DeclareLaunchArgument('use_sim_time', default_value=use_sim_time, description='Use simulation time')
     odom_topic_arg = DeclareLaunchArgument('odom_topic', default_value=odom_topic, description='Odometry input for ego_planner')
     cloud_topic_arg = DeclareLaunchArgument('cloud_topic', default_value=cloud_topic, description='Point cloud input for ego_planner')
     camera_pose_topic_arg = DeclareLaunchArgument('camera_pose_topic', default_value=camera_pose_topic, description='Camera pose topic (if used)')
@@ -51,6 +53,7 @@ def generate_launch_description():
             'map_size_x_': map_size_x,
             'map_size_y_': map_size_y,
             'map_size_z_': map_size_z,
+            'use_sim_time': use_sim_time,
             'odometry_topic': odom_topic,
             'camera_pose_topic': camera_pose_topic,
             'depth_topic': depth_topic,
@@ -73,6 +76,7 @@ def generate_launch_description():
             ('planning/bspline', [topic_prefix, 'planning/bspline'])
         ],
         parameters=[
+            {'use_sim_time': use_sim_time},
             {'traj_server/time_forward': 1.0}
         ]
     )
@@ -84,6 +88,7 @@ def generate_launch_description():
     ld.add_action(map_size_z_arg)
     ld.add_action(drone_id_arg)
     ld.add_action(topic_prefix_arg)
+    ld.add_action(use_sim_time_arg)
     ld.add_action(odom_topic_arg)
     ld.add_action(cloud_topic_arg)
     ld.add_action(camera_pose_topic_arg)

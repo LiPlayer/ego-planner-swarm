@@ -6,6 +6,7 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
+        - /simulation_map1
         - /drone01
         - /drone01/Planning1/goal_point1
         - /drone01/Planning1/global_path1
@@ -13,10 +14,11 @@ Panels:
         - /drone01/Planning1/AStar1
         - /drone01/Planning1/InitTraj1
         - /drone01/Planning1/drone_path1
-        - /drone01/Mapping1
         - /drone01/Mapping1/map inflate1
-        - /drone01/Simulation1/robot1
-        - /drone01/Simulation1/depth1
+        - /drone01/Simulation1
+        - /Odometry1
+        - /Odometry1/Status1
+        - /Odometry1/Topic1
       Splitter Ratio: 0.5
     Tree Height: 1555
   - Class: rviz_common/Selection
@@ -37,7 +39,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: simulation_map
+    SyncSource: map inflate
 Visualization Manager:
   Class: ""
   Displays:
@@ -69,27 +71,27 @@ Visualization Manager:
       Channel Name: intensity
       Class: rviz_default_plugins/PointCloud2
       Color: 85; 170; 255
-      Color Transformer: ""
+      Color Transformer: Intensity
       Decay Time: 0
       Enabled: true
       Invert Rainbow: false
       Max Color: 255; 255; 255
-      Max Intensity: 4096
+      Max Intensity: 0
       Min Color: 0; 0; 0
       Min Intensity: 0
       Name: lio_map
-      Position Transformer: ""
+      Position Transformer: XYZ
       Selectable: true
       Size (Pixels): 3
       Size (m): 0.10000000149011612
-      Style: Points
+      Style: Flat Squares
       Topic:
         Depth: 5
         Durability Policy: Volatile
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /lio_sam/map_global
+        Value: /lio_sam/mapping/cloud_registered
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
@@ -135,7 +137,7 @@ Visualization Manager:
               Enabled: true
               Name: goal_point
               Namespaces:
-                "": true
+                {}
               Topic:
                 Depth: 5
                 Durability Policy: Volatile
@@ -148,7 +150,7 @@ Visualization Manager:
               Enabled: true
               Name: global_path
               Namespaces:
-                "": true
+                {}
               Topic:
                 Depth: 5
                 Durability Policy: Volatile
@@ -161,7 +163,7 @@ Visualization Manager:
               Enabled: true
               Name: optimal_traj
               Namespaces:
-                "": true
+                {}
               Topic:
                 Depth: 5
                 Durability Policy: Volatile
@@ -187,7 +189,7 @@ Visualization Manager:
               Enabled: true
               Name: InitTraj
               Namespaces:
-                "": true
+                {}
               Topic:
                 Depth: 5
                 Durability Policy: Volatile
@@ -270,7 +272,7 @@ Visualization Manager:
               Enabled: true
               Name: robot
               Namespaces:
-                mesh: true
+                {}
               Topic:
                 Depth: 5
                 Durability Policy: Volatile
@@ -297,6 +299,45 @@ Visualization Manager:
           Name: Simulation
       Enabled: true
       Name: drone0
+    - Angle Tolerance: 0.10000000149011612
+      Class: rviz_default_plugins/Odometry
+      Covariance:
+        Orientation:
+          Alpha: 0.5
+          Color: 255; 255; 127
+          Color Style: Unique
+          Frame: Local
+          Offset: 1
+          Scale: 1
+          Value: true
+        Position:
+          Alpha: 0.30000001192092896
+          Color: 204; 51; 204
+          Scale: 1
+          Value: true
+        Value: true
+      Enabled: true
+      Keep: 100
+      Name: Odometry
+      Position Tolerance: 0.10000000149011612
+      Shape:
+        Alpha: 1
+        Axes Length: 1
+        Axes Radius: 0.10000000149011612
+        Color: 255; 25; 0
+        Head Length: 0.30000001192092896
+        Head Radius: 0.10000000149011612
+        Shaft Length: 1
+        Shaft Radius: 0.05000000074505806
+        Value: Axes
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Best Effort
+        Value: /lio_sam/mapping/odometry
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255
@@ -343,7 +384,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 66.44927215576172
+      Distance: 49.92741012573242
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -358,10 +399,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.3697962760925293
+      Pitch: 0.5297961831092834
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.604403018951416
+      Yaw: 4.586237907409668
     Saved: ~
 Window Geometry:
   Displays:
