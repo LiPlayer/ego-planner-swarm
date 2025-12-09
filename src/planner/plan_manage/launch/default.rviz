@@ -15,10 +15,6 @@ Panels:
         - /drone01/Planning1/InitTraj1
         - /drone01/Planning1/drone_path1
         - /drone01/Mapping1/map inflate1
-        - /drone01/Simulation1
-        - /Odometry1
-        - /Odometry1/Status1
-        - /Odometry1/Topic1
       Splitter Ratio: 0.5
     Tree Height: 1555
   - Class: rviz_common/Selection
@@ -150,7 +146,7 @@ Visualization Manager:
               Enabled: true
               Name: global_path
               Namespaces:
-                {}
+                "": true
               Topic:
                 Depth: 5
                 Durability Policy: Volatile
@@ -272,7 +268,7 @@ Visualization Manager:
               Enabled: true
               Name: robot
               Namespaces:
-                {}
+                mesh: true
               Topic:
                 Depth: 5
                 Durability Policy: Volatile
@@ -297,47 +293,60 @@ Visualization Manager:
               Value: false
           Enabled: true
           Name: Simulation
+        - Angle Tolerance: 0.10000000149011612
+          Class: rviz_default_plugins/Odometry
+          Covariance:
+            Orientation:
+              Alpha: 0.5
+              Color: 255; 255; 127
+              Color Style: Unique
+              Frame: Local
+              Offset: 1
+              Scale: 1
+              Value: true
+            Position:
+              Alpha: 0.30000001192092896
+              Color: 204; 51; 204
+              Scale: 1
+              Value: true
+            Value: true
+          Enabled: true
+          Keep: 100
+          Name: lio_odom
+          Position Tolerance: 0.10000000149011612
+          Shape:
+            Alpha: 1
+            Axes Length: 1
+            Axes Radius: 0.10000000149011612
+            Color: 255; 25; 0
+            Head Length: 0.30000001192092896
+            Head Radius: 0.10000000149011612
+            Shaft Length: 1
+            Shaft Radius: 0.05000000074505806
+            Value: Axes
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            Filter size: 10
+            History Policy: Keep Last
+            Reliability Policy: Best Effort
+            Value: /lio_sam/mapping/odometry
+          Value: true
+        - Class: rviz_default_plugins/Marker
+          Enabled: true
+          Name: position_cmd
+          Namespaces:
+            {}
+          Topic:
+            Depth: 5
+            Durability Policy: Volatile
+            Filter size: 10
+            History Policy: Keep Last
+            Reliability Policy: Reliable
+            Value: /plan_vis/position_cmd
+          Value: true
       Enabled: true
       Name: drone0
-    - Angle Tolerance: 0.10000000149011612
-      Class: rviz_default_plugins/Odometry
-      Covariance:
-        Orientation:
-          Alpha: 0.5
-          Color: 255; 255; 127
-          Color Style: Unique
-          Frame: Local
-          Offset: 1
-          Scale: 1
-          Value: true
-        Position:
-          Alpha: 0.30000001192092896
-          Color: 204; 51; 204
-          Scale: 1
-          Value: true
-        Value: true
-      Enabled: true
-      Keep: 100
-      Name: Odometry
-      Position Tolerance: 0.10000000149011612
-      Shape:
-        Alpha: 1
-        Axes Length: 1
-        Axes Radius: 0.10000000149011612
-        Color: 255; 25; 0
-        Head Length: 0.30000001192092896
-        Head Radius: 0.10000000149011612
-        Shaft Length: 1
-        Shaft Radius: 0.05000000074505806
-        Value: Axes
-      Topic:
-        Depth: 5
-        Durability Policy: Volatile
-        Filter size: 10
-        History Policy: Keep Last
-        Reliability Policy: Best Effort
-        Value: /lio_sam/mapping/odometry
-      Value: true
   Enabled: true
   Global Options:
     Background Color: 255; 255; 255
@@ -384,25 +393,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 49.92741012573242
+      Distance: 52.463462829589844
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -0.10945232212543488
-        Y: -1.4972786903381348
-        Z: -0.8682053685188293
+        X: -8.920455932617188
+        Y: 0.6993939280509949
+        Z: -5.606661796569824
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.5297961831092834
+      Pitch: 1.054795742034912
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.586237907409668
+      Yaw: 4.6512451171875
     Saved: ~
 Window Geometry:
   Displays:
