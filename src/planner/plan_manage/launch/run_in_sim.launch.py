@@ -60,27 +60,7 @@ def generate_launch_description():
             'max_acc': str(3.0),
             'planning_horizon': str(7.5),
             'use_distinctive_trajs': 'True',
-            'flight_type': str(2),
-            'point_num': str(1),
-            'point0_x': target_x,
-            'point0_y': target_y,
-            'point0_z': target_z,
-            
-            'point1_x': str(0.0),
-            'point1_y': str(15.0),
-            'point1_z': str(1.0),
-            
-            'point2_x': str(15.0),
-            'point2_y': str(0.0),
-            'point2_z': str(1.0),
-            
-            'point3_x': str(0.0),
-            'point3_y': str(-15.0),
-            'point3_z': str(1.0),
-            
-            'point4_x': str(-15.0),
-            'point4_y': str(0.0),
-            'point4_z': str(1.0),
+            'target_mode': str(2),
         }.items()
     )
 

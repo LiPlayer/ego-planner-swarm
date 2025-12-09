@@ -13,7 +13,7 @@ def generate_launch_description():
 
     map_size_x = LaunchConfiguration('map_size_x', default=60.0)
     map_size_y = LaunchConfiguration('map_size_y', default=40.0)
-    map_size_z = LaunchConfiguration('map_size_z', default=5.0)
+    map_size_z = LaunchConfiguration('map_size_z', default=10.0)
 
     odom_topic = LaunchConfiguration('odom_topic', default='/lio_sam/mapping/odometry')
     cloud_topic = LaunchConfiguration('cloud_topic', default='/unilidar/cloud')
@@ -23,7 +23,7 @@ def generate_launch_description():
     max_vel = LaunchConfiguration('max_vel', default=3.0)
     max_acc = LaunchConfiguration('max_acc', default=4.0)
     planning_horizon = LaunchConfiguration('planning_horizon', default=8.0)
-    flight_type = LaunchConfiguration('flight_type', default=2)
+    target_mode = LaunchConfiguration('target_mode', default=1)
     use_distinctive_trajs = LaunchConfiguration('use_distinctive_trajs', default=True)
 
     map_size_x_arg = DeclareLaunchArgument('map_size_x', default_value=map_size_x, description='Map size along x')
@@ -38,7 +38,7 @@ def generate_launch_description():
     max_vel_arg = DeclareLaunchArgument('max_vel', default_value=max_vel, description='Maximum velocity used by planner')
     max_acc_arg = DeclareLaunchArgument('max_acc', default_value=max_acc, description='Maximum acceleration used by planner')
     planning_horizon_arg = DeclareLaunchArgument('planning_horizon', default_value=planning_horizon, description='Planning horizon (seconds)')
-    flight_type_arg = DeclareLaunchArgument('flight_type', default_value=flight_type, description='Flight type mode for ego_planner')
+    target_mode_arg = DeclareLaunchArgument('target_mode', default_value=target_mode, description='Target mode for ego_planner: 1=single, 2=waypoints')
     use_distinctive_trajs_arg = DeclareLaunchArgument('use_distinctive_trajs', default_value=use_distinctive_trajs, description='Allow distinctive trajectories')
 
     advanced_param_include = IncludeLaunchDescription(
@@ -59,7 +59,7 @@ def generate_launch_description():
             'max_acc': max_acc,
             'planning_horizon': planning_horizon,
             'use_distinctive_trajs': use_distinctive_trajs,
-            'flight_type': flight_type
+            'target_mode': target_mode
         }.items()
     )
 
@@ -91,7 +91,7 @@ def generate_launch_description():
     ld.add_action(max_vel_arg)
     ld.add_action(max_acc_arg)
     ld.add_action(planning_horizon_arg)
-    ld.add_action(flight_type_arg)
+    ld.add_action(target_mode_arg)
     ld.add_action(use_distinctive_trajs_arg)
 
     ld.add_action(advanced_param_include)

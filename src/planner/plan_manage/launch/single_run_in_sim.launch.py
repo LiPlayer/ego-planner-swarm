@@ -14,6 +14,7 @@ def generate_launch_description():
     obj_num = LaunchConfiguration('obj_num', default=10)
     drone_id = LaunchConfiguration('drone_id', default=0)
     topic_prefix = LaunchConfiguration('topic_prefix', default='')
+    target_mode = LaunchConfiguration('target_mode', default=1)
     
     # Use a slightly taller map to cover the height of the random_forest map (z_size=3.0) plus margin
     map_size_x = LaunchConfiguration('map_size_x', default = 50.0)
@@ -26,6 +27,7 @@ def generate_launch_description():
     obj_num_cmd = DeclareLaunchArgument('obj_num', default_value=obj_num, description='Number of objects')
     drone_id_cmd = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
     topic_prefix_cmd = DeclareLaunchArgument('topic_prefix', default_value=topic_prefix, description='Topic prefix for planner IO (empty for no prefix)')
+    target_mode_cmd = DeclareLaunchArgument('target_mode', default_value=target_mode, description='Target mode: 1=single, 2=waypoints')
     
     map_size_x_cmd = DeclareLaunchArgument('map_size_x', default_value=map_size_x, description='Map size along x')
     map_size_y_cmd = DeclareLaunchArgument('map_size_y', default_value=map_size_y, description='Map size along y')
@@ -118,27 +120,7 @@ def generate_launch_description():
             'max_acc': str(6.0),
             'planning_horizon': str(7.5),
             'use_distinctive_trajs': 'True',
-            'flight_type': str(2),
-            'point_num': str(4),
-            'point0_x': str(15.0),
-            'point0_y': str(0.0),
-            'point0_z': str(1.0),
-            
-            'point1_x': str(-15.0),
-            'point1_y': str(0.0),
-            'point1_z': str(1.0),
-            
-            'point2_x': str(15.0),
-            'point2_y': str(0.0),
-            'point2_z': str(1.0),
-            
-            'point3_x': str(-15.0),
-            'point3_y': str(0.0),
-            'point3_z': str(1.0),
-            
-            'point4_x': str(15.0),
-            'point4_y': str(0.0),
-            'point4_z': str(1.0),
+            'target_mode': target_mode,
         }.items()
     )
     
@@ -185,6 +167,7 @@ def generate_launch_description():
     ld.add_action(topic_prefix_cmd)
     ld.add_action(use_dynamic_cmd)
     ld.add_action(use_mockamap_cmd)
+    ld.add_action(target_mode_cmd)
 
     # 添加 Map Generator 节点
     ld.add_action(map_generator_node)

@@ -24,24 +24,7 @@ def generate_launch_description():
     max_acc = LaunchConfiguration('max_acc', default=3.0)
     planning_horizon = LaunchConfiguration('planning_horizon', default=7.5)
     
-    point_num = LaunchConfiguration('point_num', default=1)
-    point0_x = LaunchConfiguration('point0_x', default=0.0)
-    point0_y = LaunchConfiguration('point0_y', default=0.0)
-    point0_z = LaunchConfiguration('point0_z', default=0.0)
-    point1_x = LaunchConfiguration('point1_x', default=10.0)
-    point1_y = LaunchConfiguration('point1_y', default=10.0)
-    point1_z = LaunchConfiguration('point1_z', default=0.0)
-    point2_x = LaunchConfiguration('point2_x', default=20.0)
-    point2_y = LaunchConfiguration('point2_y', default=20.0)
-    point2_z = LaunchConfiguration('point2_z', default=1.0)
-    point3_x = LaunchConfiguration('point3_x', default=-10.0)
-    point3_y = LaunchConfiguration('point3_y', default=-10.0)
-    point3_z = LaunchConfiguration('point3_z', default=1.0)
-    point4_x = LaunchConfiguration('point4_x', default=30.0)
-    point4_y = LaunchConfiguration('point4_y', default=30.0)
-    point4_z = LaunchConfiguration('point4_z', default=1.0)
-
-    flight_type = LaunchConfiguration('flight_type', default=2)
+    target_mode = LaunchConfiguration('target_mode', default=1)  # default to SINGLE_TARGET
     use_distinctive_trajs = LaunchConfiguration('use_distinctive_trajs', default=True)
     
     obj_num_set = LaunchConfiguration('obj_num_set', default=10)
@@ -65,24 +48,7 @@ def generate_launch_description():
     max_acc_arg = DeclareLaunchArgument('max_acc', default_value=max_acc, description='Maximum acceleration')
     planning_horizon_arg = DeclareLaunchArgument('planning_horizon', default_value=planning_horizon, description='Planning horizon')
     
-    point_num_arg = DeclareLaunchArgument('point_num', default_value=point_num, description='Number of waypoints')
-    point0_x_arg = DeclareLaunchArgument('point0_x', default_value=point0_x, description='Waypoint 0 X coordinate')
-    point0_y_arg = DeclareLaunchArgument('point0_y', default_value=point0_y, description='Waypoint 0 Y coordinate')
-    point0_z_arg = DeclareLaunchArgument('point0_z', default_value=point0_z, description='Waypoint 0 Z coordinate')
-    point1_x_arg = DeclareLaunchArgument('point1_x', default_value=point1_x, description='Waypoint 1 X coordinate')
-    point1_y_arg = DeclareLaunchArgument('point1_y', default_value=point1_y, description='Waypoint 1 Y coordinate')
-    point1_z_arg = DeclareLaunchArgument('point1_z', default_value=point1_z, description='Waypoint 1 Z coordinate')
-    point2_x_arg = DeclareLaunchArgument('point2_x', default_value=point2_x, description='Waypoint 2 X coordinate')
-    point2_y_arg = DeclareLaunchArgument('point2_y', default_value=point2_y, description='Waypoint 2 Y coordinate')
-    point2_z_arg = DeclareLaunchArgument('point2_z', default_value=point2_z, description='Waypoint 2 Z coordinate')
-    point3_x_arg = DeclareLaunchArgument('point3_x', default_value=point3_x, description='Waypoint 3 X coordinate')
-    point3_y_arg = DeclareLaunchArgument('point3_y', default_value=point3_y, description='Waypoint 3 Y coordinate')
-    point3_z_arg = DeclareLaunchArgument('point3_z', default_value=point3_z, description='Waypoint 3 Z coordinate')
-    point4_x_arg = DeclareLaunchArgument('point4_x', default_value=point4_x, description='Waypoint 4 X coordinate')
-    point4_y_arg = DeclareLaunchArgument('point4_y', default_value=point4_y, description='Waypoint 4 Y coordinate')
-    point4_z_arg = DeclareLaunchArgument('point4_z', default_value=point4_z, description='Waypoint 4 Z coordinate')
-    
-    flight_type_arg = DeclareLaunchArgument('flight_type', default_value=flight_type, description='flight_type')
+    target_mode_arg = DeclareLaunchArgument('target_mode', default_value=target_mode, description='Target mode: 1=single, 2=waypoints')
     use_distinctive_trajs_arg = DeclareLaunchArgument('use_distinctive_trajs', default_value=use_distinctive_trajs, description='Use distinctive trajectories')
     obj_num_set_arg = DeclareLaunchArgument('obj_num_set', default_value=obj_num_set, description='Number of objects')
     drone_id_arg = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
@@ -101,7 +67,6 @@ def generate_launch_description():
             ('grid_map/cloud', [topic_prefix, cloud_topic]),              # point cloud input
             ('grid_map/pose', [topic_prefix, camera_pose_topic]),         # camera pose
             ('grid_map/depth', [topic_prefix, depth_topic]),              # depth image
-            ('grid_map/occupancy_inflate', [topic_prefix, 'grid_map/occupancy_inflate']),
 
             # Outputs
             ('planning/bspline', [topic_prefix, 'planning/bspline']),
@@ -111,13 +76,14 @@ def generate_launch_description():
             ('init_list', [topic_prefix, 'plan_vis/init_list']),
             ('optimal_list', [topic_prefix, 'plan_vis/optimal_list']),
             ('a_star_list', [topic_prefix, 'plan_vis/a_star_list']),
+            ('grid_map/occupancy_inflate', [topic_prefix, 'grid_map/occupancy_inflate']),
 
             # Global coordination channels (stay un-namespaced)
             ('planning/broadcast_bspline_from_planner', '/broadcast_bspline'),
             ('planning/broadcast_bspline_to_planner', '/broadcast_bspline'),
         ],
         parameters=[
-            {'fsm/flight_type': flight_type},
+            {'fsm/target_mode': target_mode},
             {'fsm/thresh_replan_time': 1.0},
             {'fsm/thresh_no_replan_meter': 1.0},
             {'fsm/planning_horizon': planning_horizon},
@@ -125,23 +91,6 @@ def generate_launch_description():
             {'fsm/emergency_time': 1.0},
             {'fsm/realworld_experiment': False},
             {'fsm/fail_safe': True},
-            
-            {'fsm/waypoint_num': point_num},
-            {'fsm/waypoint0_x': point0_x},
-            {'fsm/waypoint0_y': point0_y},
-            {'fsm/waypoint0_z': point0_z},
-            {'fsm/waypoint1_x': point1_x},
-            {'fsm/waypoint1_y': point1_y},
-            {'fsm/waypoint1_z': point1_z},
-            {'fsm/waypoint2_x': point2_x},
-            {'fsm/waypoint2_y': point2_y},
-            {'fsm/waypoint2_z': point2_z},
-            {'fsm/waypoint3_x': point3_x},
-            {'fsm/waypoint3_y': point3_y},
-            {'fsm/waypoint3_z': point3_z},
-            {'fsm/waypoint4_x': point4_x},
-            {'fsm/waypoint4_y': point4_y},
-            {'fsm/waypoint4_z': point4_z},
             
             {'grid_map/resolution': 0.1},
             {'grid_map/map_size_x': map_size_x},
@@ -230,24 +179,7 @@ def generate_launch_description():
     ld.add_action(max_acc_arg)
     ld.add_action(planning_horizon_arg)
     
-    ld.add_action(point_num_arg)
-    ld.add_action(point0_x_arg)
-    ld.add_action(point0_y_arg)
-    ld.add_action(point0_z_arg)
-    ld.add_action(point1_x_arg)
-    ld.add_action(point1_y_arg)
-    ld.add_action(point1_z_arg)
-    ld.add_action(point2_x_arg)
-    ld.add_action(point2_y_arg)
-    ld.add_action(point2_z_arg)
-    ld.add_action(point3_x_arg)
-    ld.add_action(point3_y_arg)
-    ld.add_action(point3_z_arg)
-    ld.add_action(point4_x_arg)
-    ld.add_action(point4_y_arg)
-    ld.add_action(point4_z_arg)
-    
-    ld.add_action(flight_type_arg)
+    ld.add_action(target_mode_arg)
     ld.add_action(use_distinctive_trajs_arg)
     ld.add_action(obj_num_set_arg)
     ld.add_action(drone_id_arg)
