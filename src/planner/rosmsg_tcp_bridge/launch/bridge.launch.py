@@ -27,7 +27,7 @@ def generate_launch_description():
             {'odom_max_freq': 70.0}
         ],
         remappings=[
-            ('position_cmd', ['drone_', drone_id, '_planning/pos_cmd']),
+            ('position_cmd', ['drone_', drone_id, '_planning/position_cmd']),
             ('planning/bspline', ['drone_', drone_id, '_planning/bspline']),
             ('my_odom', '/vins_estimator/imu_propagate')
         ]

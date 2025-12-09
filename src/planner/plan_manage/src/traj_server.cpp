@@ -7,6 +7,7 @@
 #include <rclcpp/rclcpp.hpp>
 
 rclcpp::Publisher<quadrotor_msgs::msg::PositionCommand>::SharedPtr pos_cmd_pub;
+rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr pos_cmd_vis_pub;
 
 quadrotor_msgs::msg::PositionCommand cmd;
 double pos_gain[3] = {0, 0, 0};
@@ -229,6 +230,29 @@ void cmdCallback()
   last_yaw_ = cmd.yaw;
 
   pos_cmd_pub->publish(cmd);
+
+  // Visualize the current target position for RViz
+  if (pos_cmd_vis_pub) {
+    visualization_msgs::msg::Marker marker;
+    marker.header.frame_id = "world";
+    marker.header.stamp = time_now;
+    marker.ns = "position_cmd";
+    marker.id = 0;
+    marker.type = visualization_msgs::msg::Marker::SPHERE;
+    marker.action = visualization_msgs::msg::Marker::ADD;
+    marker.pose.orientation.w = 1.0;
+    marker.pose.position.x = cmd.position.x;
+    marker.pose.position.y = cmd.position.y;
+    marker.pose.position.z = cmd.position.z;
+    marker.scale.x = 0.2;
+    marker.scale.y = 0.2;
+    marker.scale.z = 0.2;
+    marker.color.r = 0.2;
+    marker.color.g = 0.8;
+    marker.color.b = 0.2;
+    marker.color.a = 0.9;
+    pos_cmd_vis_pub->publish(marker);
+  }
 }
 
 int main(int argc, char **argv)
@@ -244,6 +268,10 @@ int main(int argc, char **argv)
   pos_cmd_pub = node->create_publisher<quadrotor_msgs::msg::PositionCommand>(
       "/position_cmd",
       50);
+
+  pos_cmd_vis_pub = node->create_publisher<visualization_msgs::msg::Marker>(
+      "plan_vis/position_cmd",
+      10);
 
   auto cmd_timer = node->create_wall_timer(
       std::chrono::milliseconds(10),

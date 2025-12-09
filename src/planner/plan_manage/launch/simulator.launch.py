@@ -157,7 +157,7 @@ def generate_launch_description():
                 corrections_file
             ],
             remappings=[('odom', [topic_prefix, 'visual_slam/odom']),
-                        ('position_cmd', [topic_prefix, 'planning/pos_cmd']),
+                        ('position_cmd', [topic_prefix, 'planning/position_cmd']),
                         ('motors', [topic_prefix, 'motors']),
                         ('corrections', [topic_prefix, 'corrections']),
                         ('so3_cmd', [topic_prefix, 'so3_cmd'])],
@@ -188,7 +188,7 @@ def generate_launch_description():
             {'use_sim_time': use_sim_time}
         ],
         remappings=[
-            ('command', [topic_prefix, 'planning/pos_cmd']),
+            ('command', [topic_prefix, 'planning/position_cmd']),
             ('odometry', [topic_prefix, odometry_topic])
         ],
         condition = UnlessCondition(use_dynamic)

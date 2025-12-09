@@ -83,6 +83,8 @@ def generate_launch_description():
             # Outputs
             ('planning/bspline', [topic_prefix, 'planning/bspline']),
             ('planning/data_display', [topic_prefix, 'planning/data_display']),
+            ('position_cmd', [topic_prefix, 'planning/position_cmd']),    # planner outputs position commands
+            ('plan_vis/position_cmd', [topic_prefix, 'plan_vis/position_cmd']),  # visualize position commands
             ('goal_point', [topic_prefix, 'plan_vis/goal_point']),
             ('global_list', [topic_prefix, 'plan_vis/global_list']),
             ('init_list', [topic_prefix, 'plan_vis/init_list']),

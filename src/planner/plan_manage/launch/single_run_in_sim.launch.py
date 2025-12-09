@@ -134,8 +134,9 @@ def generate_launch_description():
         name=['drone_', drone_id, '_traj_server'],
         output='screen',
         remappings=[
-            ('position_cmd', [topic_prefix, 'planning/pos_cmd']),  # output position commands
-            ('planning/bspline', [topic_prefix, 'planning/bspline'])  # publishes bspline
+            ('position_cmd', [topic_prefix, 'planning/position_cmd']),  # output position commands
+            ('planning/bspline', [topic_prefix, 'planning/bspline']),  # publishes bspline
+            ('plan_vis/position_cmd', [topic_prefix, 'plan_vis/position_cmd'])  # visualization of position commands
         ],
         parameters=[
             {'use_sim_time': use_sim_time},
