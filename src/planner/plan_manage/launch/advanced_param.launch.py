@@ -3,6 +3,7 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration, PythonExpression
 from launch_ros.actions import Node
+from launch_ros.substitutions import FindPackageShare
 
 def generate_launch_description():
     # LaunchConfigurations
@@ -53,6 +54,15 @@ def generate_launch_description():
     obj_num_set_arg = DeclareLaunchArgument('obj_num_set', default_value=obj_num_set, description='Number of objects')
     drone_id_arg = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
     topic_prefix_arg = DeclareLaunchArgument('topic_prefix', default_value=topic_prefix, description='Topic prefix for namespacing planner IO')
+
+    # Static TF from world -> map (identity)
+    static_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='static_world_to_map',
+        arguments=['0', '0', '0', '0', '0', '0', 'world', 'map'],
+        output='screen',
+    )
 
     # Ego Planner Node
     ego_planner_node = Node(
@@ -187,6 +197,7 @@ def generate_launch_description():
 
 
     # Add Node
+    ld.add_action(static_tf)
     ld.add_action(ego_planner_node)
 
     return ld
