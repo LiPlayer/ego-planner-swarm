@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.8)
 project(local_sensing)
 
 # 设置编译选项
-set(CMAKE_BUILD_TYPE Release)
 add_compile_options(-std=c++17)
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -27,7 +26,9 @@ endif()
 
 if(ENABLE_CUDA)
   find_package(CUDA REQUIRED)
-  set(CUDA_NVCC_FLAGS ${CUDA_NVCC_FLAGS};-O3 -use_fast_math)
+  if(CMAKE_BUILD_TYPE STREQUAL "Release")
+    list(APPEND CUDA_NVCC_FLAGS -O3 -use_fast_math)
+  endif()
   set(CUDA_NVCC_FLAGS 
 #       -gencode arch=compute_20,code=sm_20;
 #       -gencode arch=compute_20,code=sm_21;

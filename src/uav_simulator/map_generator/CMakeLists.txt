@@ -1,21 +1,10 @@
 cmake_minimum_required(VERSION 3.8)
 project(map_generator)
 
-# 设置构建类型
-set(CMAKE_BUILD_TYPE "Release")
-
 # 设置C++标准（建议使用C++14或C++17）
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
-
-# 添加编译选项
-add_compile_options(-Wall -Wextra -Wpedantic)
-
-# 仅在Release模式下添加优化选项
-if(CMAKE_BUILD_TYPE STREQUAL "Release")
-  add_compile_options(-O3 -g)
-endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
