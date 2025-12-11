@@ -15,6 +15,9 @@ Panels:
         - /drone01/Planning1/InitTraj1
         - /drone01/Planning1/drone_path1
         - /drone01/Mapping1/map inflate1
+        - /drone01/position_cmd1
+        - /drone01/position_cmd1/Status1
+        - /drone01/position_cmd1/Topic1
       Splitter Ratio: 0.5
     Tree Height: 1555
   - Class: rviz_common/Selection
@@ -159,7 +162,7 @@ Visualization Manager:
               Enabled: true
               Name: optimal_traj
               Namespaces:
-                {}
+                "": true
               Topic:
                 Depth: 5
                 Durability Policy: Volatile
@@ -185,7 +188,7 @@ Visualization Manager:
               Enabled: true
               Name: InitTraj
               Namespaces:
-                {}
+                "": true
               Topic:
                 Depth: 5
                 Durability Policy: Volatile
@@ -336,13 +339,13 @@ Visualization Manager:
           Enabled: true
           Name: position_cmd
           Namespaces:
-            {}
+            position_cmd: true
           Topic:
             Depth: 5
             Durability Policy: Volatile
             Filter size: 10
             History Policy: Keep Last
-            Reliability Policy: Reliable
+            Reliability Policy: Best Effort
             Value: /plan_vis/position_cmd
           Value: true
       Enabled: true
@@ -393,25 +396,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 52.463462829589844
+      Distance: 60.791175842285156
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -8.920455932617188
-        Y: 0.6993939280509949
-        Z: -5.606661796569824
+        X: -8.678454399108887
+        Y: 0.5966634154319763
+        Z: -5.791479587554932
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 1.054795742034912
+      Pitch: 1.514796495437622
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.6512451171875
+      Yaw: 4.606232643127441
     Saved: ~
 Window Geometry:
   Displays:

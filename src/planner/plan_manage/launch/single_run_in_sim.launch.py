@@ -41,7 +41,7 @@ def generate_launch_description():
     
     use_mockamap_cmd = DeclareLaunchArgument('use_mockamap', default_value=use_mockamap, description='Choose map type, map_generator or mockamap')
     
-    use_dynamic = LaunchConfiguration('use_dynamic', default=False)  
+    use_dynamic = LaunchConfiguration('use_dynamic', default=True)  
     use_dynamic_cmd = DeclareLaunchArgument('use_dynamic', default_value=use_dynamic, description='Use Drone Simulation Considering Dynamics or Not')
     
     # map
