@@ -103,6 +103,7 @@ namespace ego_planner
     void setBsplineInterval(const double &ts);
     void setSwarmTrajs(SwarmTrajData *swarm_trajs_ptr);
     void setDroneId(const int drone_id);
+    void setClock(const rclcpp::Clock::SharedPtr &clock) { clock_ = clock; }
 
     // optional inputs
     void setGuidePath(const vector<Eigen::Vector3d> &guide_pt);
@@ -131,6 +132,7 @@ namespace ego_planner
     fast_planner::ObjPredictor::Ptr moving_objs_;
     SwarmTrajData *swarm_trajs_{NULL}; // Can not use shared_ptr and no need to free
     int drone_id_;
+    rclcpp::Clock::SharedPtr clock_;
 
     enum FORCE_STOP_OPTIMIZE_TYPE
     {
@@ -192,6 +194,7 @@ namespace ego_planner
     void calcSwarmCost(const Eigen::MatrixXd &q, double &cost, Eigen::MatrixXd &gradient);
     void calcFitnessCost(const Eigen::MatrixXd &q, double &cost, Eigen::MatrixXd &gradient);
     bool check_collision_and_rebound(void);
+    rclcpp::Time now() const;
 
     static int earlyExit(void *func_data, const double *x, const double *g, const double fx, const double xnorm, const double gnorm, const double step, int n, int k, int ls);
     static double costFunctionRebound(void *func_data, const double *x, double *grad, const int n);

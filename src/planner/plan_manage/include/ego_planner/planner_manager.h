@@ -61,6 +61,7 @@ namespace ego_planner
     // ros::Publisher obj_pub_; //zx-todo 
 
     BsplineOptimizer::Ptr bspline_optimizer_;
+    rclcpp::Node::SharedPtr node_;
 
     int continous_failures_count_{0};
 

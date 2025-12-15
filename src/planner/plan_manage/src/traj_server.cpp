@@ -5,6 +5,7 @@
 #include "std_msgs/msg/empty.hpp"
 #include "visualization_msgs/msg/marker.hpp"
 #include <rclcpp/rclcpp.hpp>
+#include <functional>
 
 rclcpp::Publisher<quadrotor_msgs::msg::PositionCommand>::SharedPtr pos_cmd_pub;
 rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr pos_cmd_vis_pub;
@@ -69,7 +70,7 @@ void bsplineCallback(traj_utils::msg::Bspline::ConstPtr msg)
   receive_traj_ = true;
 }
 
-std::pair<double, double> calculate_yaw(double t_cur, Eigen::Vector3d &pos, rclcpp::Time &time_now, rclcpp::Time &time_last)
+std::pair<double, double> calculate_yaw(double t_cur, Eigen::Vector3d &pos, const rclcpp::Time &time_now, const rclcpp::Time &time_last)
 {
   constexpr double PI = 3.1415926;
   constexpr double YAW_DOT_MAX_PER_SEC = PI;
@@ -161,21 +162,20 @@ std::pair<double, double> calculate_yaw(double t_cur, Eigen::Vector3d &pos, rclc
   return yaw_yawdot;
 }
 
-void cmdCallback()
+void cmdCallback(const rclcpp::Node::SharedPtr &node)
 {
   /* no publishing before receive traj_ */
   if (!receive_traj_)
     return;
 
-  // 统一时间源
-  rclcpp::Clock clock(RCL_ROS_TIME);  
-  rclcpp::Time time_now = clock.now();
+  // Use node clock so sim/system time works transparently.
+  const auto time_now = node->now();
   double t_cur = (time_now - start_time_).seconds();
 
   Eigen::Vector3d pos(Eigen::Vector3d::Zero()), vel(Eigen::Vector3d::Zero()), acc(Eigen::Vector3d::Zero()), pos_f;
   std::pair<double, double> yaw_yawdot(0, 0);
 
-  static rclcpp::Time time_last = clock.now();
+  static rclcpp::Time time_last = node->now();
   if (t_cur < traj_duration_ && t_cur >= 0.0)
   {
     pos = traj_[0].evaluateDeBoorT(t_cur);
@@ -275,7 +275,7 @@ int main(int argc, char **argv)
 
   auto cmd_timer = node->create_wall_timer(
       std::chrono::milliseconds(10),
-      cmdCallback);
+      [node]() { cmdCallback(node); });
 
   /* control parameter */
   cmd.kx[0] = pos_gain[0];

@@ -113,6 +113,7 @@ namespace fast_planner
     int skip_num_;
     int queue_size_;
     rclcpp::Time global_start_time_;
+    rclcpp::Clock::SharedPtr clock_;
 
     ObjHistory()
     {
@@ -121,7 +122,8 @@ namespace fast_planner
     {
     }
 
-    void init(int id, int skip_num, int queue_size, rclcpp::Time global_start_time);
+    void init(int id, int skip_num, int queue_size, rclcpp::Time global_start_time,
+              const rclcpp::Clock::SharedPtr &clock);
 
     void poseCallback(const geometry_msgs::msg::PoseStamped::ConstPtr &msg);
 

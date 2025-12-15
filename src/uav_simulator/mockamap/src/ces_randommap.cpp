@@ -69,7 +69,21 @@ bool _has_odom = false;
 sensor_msgs::msg::PointCloud2 globalMap_pcd;
 sensor_msgs::msg::PointCloud2 localMap_pcd;
 pcl::PointCloud<pcl::PointXYZ> cloudMap;
-rclcpp::Time begin_time = rclcpp::Time(0, 0);
+rclcpp::Clock::SharedPtr g_clock = std::make_shared<rclcpp::Clock>(RCL_ROS_TIME);
+rclcpp::Time begin_time = rclcpp::Time(0, 0, RCL_ROS_TIME);
+
+inline rclcpp::Time Now()
+{
+  return g_clock ? g_clock->now() : rclcpp::Clock(RCL_ROS_TIME).now();
+}
+
+inline void SetClock(const rclcpp::Clock::SharedPtr &clock)
+{
+  if (clock)
+  {
+    g_clock = clock;
+  }
+}
 
 typedef Eigen::Vector3d ObsPos;
 typedef Eigen::Vector3d ObsSize; // x, y, height --- z
@@ -187,7 +201,7 @@ void publishAllPoints()
   if (!map_ok)
     return;
 
-  if ((rclcpp::Clock().now() - begin_time).seconds() > 7.0)
+  if ((Now() - begin_time).seconds() > 7.0)
     return;
 
   frequence_division_global--;
@@ -246,7 +260,7 @@ void pubSensedPoints()
   localMap_pcd.header.frame_id = kFrameIdNs_;
   _local_map_pub->publish(localMap_pcd);
 
-  rclcpp::Time time_aft_sensing = rclcpp::Clock().now();
+  rclcpp::Time time_aft_sensing = Now();
 
   if ((time_aft_sensing - begin_time).seconds() > 5.0)
     return;

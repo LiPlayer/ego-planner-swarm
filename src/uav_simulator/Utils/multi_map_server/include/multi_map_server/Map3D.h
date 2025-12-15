@@ -344,6 +344,9 @@ public:
         logOddFreeFixedThr = log(1.0 / (1.0 - PROB_FREE_FIXED_THRESHOLD) - 1.0) * LOG_ODD_SCALE_FACTOR;
     }
 
+    void SetClock(const rclcpp::Clock::SharedPtr &clock) { clock_ = clock; }
+    rclcpp::Time Now() const { return clock_ ? clock_->now() : rclcpp::Clock(RCL_ROS_TIME).now(); }
+
     ~Map3D()
     {
         for (unsigned int k = 0; k < mapBase.size(); k++)
@@ -359,9 +362,9 @@ public:
     void PackMsg(multi_map_server::msg::SparseMap3D &msg)
     {
         // Basic map info
-        msg.header.stamp = rclcpp::Clock().now();
+        msg.header.stamp = Now();
         msg.header.frame_id = string("/map");
-        msg.info.map_load_time = rclcpp::Clock().now();
+        msg.info.map_load_time = Now();
         msg.info.resolution = resolution;
         msg.info.origin.position.x = originX;
         msg.info.origin.position.y = originY;
@@ -573,8 +576,10 @@ private:
         if (decayInterval < 0)
             return;
         // Check whether to decay
-        static rclcpp::Time prevDecayT = rclcpp::Clock().now();
-        rclcpp::Time  t = rclcpp::Clock().now();
+        static rclcpp::Time prevDecayT = rclcpp::Time(0, 0, RCL_ROS_TIME);
+        rclcpp::Time  t = Now();
+        if (prevDecayT.seconds() <= 0.0)
+            prevDecayT = t;
         double dt = (t - prevDecayT).seconds();
         if (dt > decayInterval)
         {
@@ -605,6 +610,7 @@ private:
     int mapX, mapY;
     int expandStep;
     vector<OccupancyGridList *> mapBase;
+    rclcpp::Clock::SharedPtr clock_;
 
     vector<arma::colvec> pts;
 };

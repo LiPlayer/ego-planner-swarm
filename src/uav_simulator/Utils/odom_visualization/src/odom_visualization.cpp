@@ -14,6 +14,7 @@
 #include "pose_utils/pose_utils.h"
 #include "quadrotor_msgs/msg/position_command.hpp"
 #include "std_msgs/msg/float64.hpp"
+#include <functional>
 
 using namespace arma;
 using namespace std;
@@ -56,13 +57,14 @@ string _frame_id;
 int _drone_id;
 
 // debug
-rclcpp::Time debug_time = rclcpp::Clock().now();
-rclcpp::Time debug_time_last = rclcpp::Clock().now();
+rclcpp::Time debug_time;
+rclcpp::Time debug_time_last;
 double time_gap = 0;
 std_msgs::msg::Float64 time_message;
 rclcpp::Publisher<std_msgs::msg::Float64>::SharedPtr timePub;
 
-void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg)
+void odom_callback(const rclcpp::Clock::SharedPtr &clock,
+                   const nav_msgs::msg::Odometry::SharedPtr msg)
 {
     if (msg->header.frame_id == string("null"))
         return;
@@ -140,7 +142,7 @@ void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg)
 
     // Path
     static rclcpp::Time prevt = msg->header.stamp;
-    rclcpp::Time current_time(msg->header.stamp.sec, msg->header.stamp.nanosec, RCL_ROS_TIME);
+    rclcpp::Time current_time(msg->header.stamp.sec, msg->header.stamp.nanosec, clock->get_clock_type());
     if ((current_time - prevt).seconds() > 0.1)
     {
         prevt = msg->header.stamp;
@@ -266,7 +268,7 @@ void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg)
     if ((t - pt).seconds() > 0.5)
     {
         trajROS.header.frame_id = string("world");
-        trajROS.header.stamp = rclcpp::Clock().now();
+    trajROS.header.stamp = clock->now();
         trajROS.ns = string("trajectory");
         trajROS.type = visualization_msgs::msg::Marker::LINE_LIST;
         trajROS.action = visualization_msgs::msg::Marker::ADD;
@@ -373,7 +375,11 @@ void odom_callback(const nav_msgs::msg::Odometry::SharedPtr msg)
     meshROS.color.b = color_b;
     meshROS.mesh_resource = mesh_resource;
     meshPub->publish(meshROS);
-    debug_time = rclcpp::Clock().now();
+    debug_time = clock->now();
+    if (debug_time_last.nanoseconds() == 0)
+    {
+        debug_time_last = debug_time;
+    }
     time_gap = (debug_time - debug_time_last).seconds();
     time_message.data = time_gap;
     debug_time_last = debug_time;
@@ -542,9 +548,12 @@ int main(int argc, char **argv)
     node->get_parameter("drone_id", _drone_id);
 
 
+    auto clock = node->get_clock();
     // 发布者和订阅者
     auto sub_odom = node->create_subscription<nav_msgs::msg::Odometry>(
-        "odom", 100, odom_callback);
+        "odom", 100, [clock](const nav_msgs::msg::Odometry::SharedPtr msg) {
+          odom_callback(clock, msg);
+        });
     auto sub_cmd = node->create_subscription<quadrotor_msgs::msg::PositionCommand>(
         "cmd", 100, cmd_callback);
 

@@ -13,6 +13,7 @@
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <functional>
 #define PORT 8080
 #define UDP_PORT 8081
 #define BUF_LEN 1048576    // 1MB
@@ -626,11 +627,12 @@ void multitraj_sub_tcp_cb(const std::shared_ptr<const traj_utils::msg::MultiBspl
 }
 
 // mmz@todo 原本代码中这里传的是const，但是下面修改了msg，const会报错，还不知道为什么, 只能创建一个副本
-void odom_sub_udp_cb(const std::shared_ptr<const nav_msgs::msg::Odometry> &msg)
+void odom_sub_udp_cb(const rclcpp::Clock::SharedPtr &clock,
+                     const std::shared_ptr<const nav_msgs::msg::Odometry> &msg)
 {
 
   static rclcpp::Time t_last;
-  rclcpp::Time t_now = rclcpp::Clock().now();
+  rclcpp::Time t_now = clock->now();
   if ((t_now - t_last).seconds() * odom_broadcast_freq_ < 1.0)
   {
     return;
@@ -826,8 +828,11 @@ int main(int argc, char *argv[])
     swarm_trajs_pub_ = node->create_publisher<traj_utils::msg::MultiBsplines>(pub_traj_topic_name.c_str(), 10);
   }
 
+  auto clock = node->get_clock();
   other_odoms_sub_ = node->create_subscription<nav_msgs::msg::Odometry>(
-      "my_odom", 10, odom_sub_udp_cb);
+      "my_odom", 10, [clock](const std::shared_ptr<const nav_msgs::msg::Odometry> &msg) {
+        odom_sub_udp_cb(clock, msg);
+      });
   other_odoms_pub_ = node->create_publisher<nav_msgs::msg::Odometry>(
       "/others_odom", 10);
 

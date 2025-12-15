@@ -18,6 +18,7 @@ private:
     int binning;
     bool isBinningSet;
     bool updated;
+    rclcpp::Clock::SharedPtr clock_;
 
 public:
     Map2D()
@@ -59,6 +60,9 @@ public:
         if (!isBinningSet)
             binning = _binning;
     }
+
+    void SetClock(const rclcpp::Clock::SharedPtr &clock) { clock_ = clock; }
+    rclcpp::Time Now() const { return clock_ ? clock_->now() : rclcpp::Clock(RCL_ROS_TIME).now(); }
 
     // Get occupancy value, 0: unknown; +ve: occupied; -ve: free
     signed char GetOccupiedFromWorldFrame(double x, double y)
@@ -244,8 +248,8 @@ public:
 
     const nav_msgs::msg::OccupancyGrid &GetMap()
     {
-        map.header.stamp = rclcpp::Clock().now();
-        map.info.map_load_time = rclcpp::Clock().now();
+        map.header.stamp = Now();
+        map.info.map_load_time = Now();
         map.header.frame_id = string("/map");
         updated = false;
         return map;

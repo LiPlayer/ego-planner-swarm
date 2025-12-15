@@ -24,10 +24,10 @@ void rcvPosCmdCallBack(const quadrotor_msgs::msg::PositionCommand cmd)
 }
 
 // 发布里程计信息的函数
-void pubOdom()
+void pubOdom(const rclcpp::Node::SharedPtr &node)
 {
     auto odom = nav_msgs::msg::Odometry();
-    odom.header.stamp = rclcpp::Clock().now();
+    odom.header.stamp = node->now();
     odom.header.frame_id = "world";
 
     if (rcv_cmd)
@@ -113,7 +113,7 @@ int main(int argc, char *argv[])
     bool status = rclcpp::ok();
     while (status)
     {
-        pubOdom();
+        pubOdom(node);
         rclcpp::spin_some(node);
         status = rclcpp::ok();
         rate.sleep();
