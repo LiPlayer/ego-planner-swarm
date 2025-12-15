@@ -244,6 +244,10 @@ void EGOReplanFSM::odometryCallback(
   odom_orient_.y() = msg->pose.pose.orientation.y;
   odom_orient_.z() = msg->pose.pose.orientation.z;
 
+  // Store the local receive time for position prediction
+  // Using node clock instead of msg timestamp to avoid clock sync issues
+  odom_timestamp_ = node_->now();
+
   have_odom_ = true;
 
   if (target_mode_ == TARGET_TYPE::SINGLE_TARGET && !have_target_) {
@@ -639,30 +643,32 @@ bool EGOReplanFSM::planFromGlobalTraj(const int trial_times /*=1*/) // zx-todo
 }
 
 bool EGOReplanFSM::planFromCurrentTraj(const int trial_times /*=1*/) {
+  // Predict position based on odom age to compensate for network latency
+  // predicted_pos = odom_pos + odom_vel * dt
+  double odom_age = 0.0;
+  if (odom_timestamp_.nanoseconds() > 0) {
+    odom_age = (node_->now() - odom_timestamp_).seconds();
+    // Clamp prediction time to avoid unreasonable extrapolation
+    odom_age = std::max(0.0, std::min(odom_age, 0.5));
+  }
 
-  LocalTrajData *info = &planner_manager_->local_data_;
-  // ros::Time time_now = ros::Time::now();
-  auto time_now = node_->now();
-  // double t_cur = (time_now - info->start_time_).toSec();
-  double t_cur = (time_now - info->start_time_).seconds();
+  start_pt_ = odom_pos_ + odom_vel_ * odom_age;
+  start_vel_ = odom_vel_;
+  start_acc_.setZero();
 
-  start_pt_ = info->position_traj_.evaluateDeBoorT(t_cur);
-  start_vel_ = info->velocity_traj_.evaluateDeBoorT(t_cur);
-  start_acc_ = info->acceleration_traj_.evaluateDeBoorT(t_cur);
-
-  bool success = callReboundReplan(false, false);
+  // Force polynomial init (flag_use_poly_init=true) to ensure replanning
+  // starts from predicted odom position, not from time-based trajectory
+  // evaluation
+  bool success = callReboundReplan(true, false);
 
   if (!success) {
-    success = callReboundReplan(true, false);
+    for (int i = 0; i < trial_times; i++) {
+      success = callReboundReplan(true, true);
+      if (success)
+        break;
+    }
     if (!success) {
-      for (int i = 0; i < trial_times; i++) {
-        success = callReboundReplan(true, true);
-        if (success)
-          break;
-      }
-      if (!success) {
-        return false;
-      }
+      return false;
     }
   }
 

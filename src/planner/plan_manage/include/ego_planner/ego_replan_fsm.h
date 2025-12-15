@@ -70,6 +70,7 @@ private:
 
   Eigen::Vector3d odom_pos_, odom_vel_, odom_acc_; // odometry state
   Eigen::Quaterniond odom_orient_;
+  rclcpp::Time odom_timestamp_; // timestamp of the last odometry message
 
   Eigen::Vector3d init_pt_, start_pt_, start_vel_, start_acc_,
       start_yaw_;                                      // start state
