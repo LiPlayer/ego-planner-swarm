@@ -8,16 +8,6 @@ Panels:
         - /Status1
         - /simulation_map1
         - /drone01
-        - /drone01/Planning1/goal_point1
-        - /drone01/Planning1/global_path1
-        - /drone01/Planning1/optimal_traj1
-        - /drone01/Planning1/AStar1
-        - /drone01/Planning1/InitTraj1
-        - /drone01/Planning1/drone_path1
-        - /drone01/Mapping1/map inflate1
-        - /drone01/position_cmd1
-        - /drone01/position_cmd1/Status1
-        - /drone01/position_cmd1/Topic1
       Splitter Ratio: 0.5
     Tree Height: 1555
   - Class: rviz_common/Selection
