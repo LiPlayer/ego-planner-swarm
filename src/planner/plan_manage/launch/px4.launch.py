@@ -16,7 +16,7 @@ def generate_launch_description():
     map_size_z = LaunchConfiguration('map_size_z', default=10.0)
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    odom_topic = LaunchConfiguration('odom_topic', default='/lio_sam/mapping/odometry')
+    odom_topic = LaunchConfiguration('odom_topic', default='/odometry/imu')
     cloud_topic = LaunchConfiguration('cloud_topic', default='/lidar/cloud')
     camera_pose_topic = LaunchConfiguration('camera_pose_topic', default='camera_pose')
     depth_topic = LaunchConfiguration('depth_topic', default='depth_image')
