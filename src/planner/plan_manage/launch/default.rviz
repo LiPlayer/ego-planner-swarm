@@ -260,7 +260,7 @@ Visualization Manager:
               Enabled: true
               Name: robot
               Namespaces:
-                mesh: true
+                {}
               Topic:
                 Depth: 5
                 Durability Policy: Volatile
@@ -285,7 +285,7 @@ Visualization Manager:
               Value: false
           Enabled: true
           Name: Simulation
-        - Angle Tolerance: 0.10000000149011612
+        - Angle Tolerance: 0.0010000000474974513
           Class: rviz_default_plugins/Odometry
           Covariance:
             Orientation:
@@ -303,9 +303,9 @@ Visualization Manager:
               Value: true
             Value: true
           Enabled: true
-          Keep: 100
+          Keep: 1
           Name: lio_odom
-          Position Tolerance: 0.10000000149011612
+          Position Tolerance: 0.0010000000474974513
           Shape:
             Alpha: 1
             Axes Length: 1
@@ -322,7 +322,7 @@ Visualization Manager:
             Filter size: 10
             History Policy: Keep Last
             Reliability Policy: Best Effort
-            Value: /lio_sam/mapping/odometry
+            Value: /odometry/imu
           Value: true
         - Class: rviz_default_plugins/Marker
           Enabled: true
@@ -385,25 +385,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 60.791175842285156
+      Distance: 28.376035690307617
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: -8.678454399108887
-        Y: 0.5966634154319763
-        Z: -5.791479587554932
+        X: 2.6933889389038086
+        Y: 4.010549068450928
+        Z: -2.6890573501586914
       Focal Shape Fixed Size: false
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.624796450138092
+      Pitch: 0.6447964906692505
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 4.626233100891113
+      Yaw: 4.581238269805908
     Saved: ~
 Window Geometry:
   Displays:

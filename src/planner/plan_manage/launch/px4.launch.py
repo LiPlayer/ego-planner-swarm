@@ -21,8 +21,8 @@ def generate_launch_description():
     camera_pose_topic = LaunchConfiguration('camera_pose_topic', default='camera_pose')
     depth_topic = LaunchConfiguration('depth_topic', default='depth_image')
 
-    max_vel = LaunchConfiguration('max_vel', default=3.0)
-    max_acc = LaunchConfiguration('max_acc', default=4.0)
+    max_vel = LaunchConfiguration('max_vel', default=0.5)
+    max_acc = LaunchConfiguration('max_acc', default=0.5)
     planning_horizon = LaunchConfiguration('planning_horizon', default=8.0)
     target_mode = LaunchConfiguration('target_mode', default=1)
     use_distinctive_trajs = LaunchConfiguration('use_distinctive_trajs', default=True)
