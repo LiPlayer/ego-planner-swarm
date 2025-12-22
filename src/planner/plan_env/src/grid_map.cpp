@@ -1,11 +1,16 @@
 #include "plan_env/grid_map.h"
 
+#include <tf2/exceptions.h>
+#include <tf2_sensor_msgs/tf2_sensor_msgs.hpp>
+
 // #define current_img_ md_.depth_image_[image_cnt_ & 1]
 // #define last_img_ md_.depth_image_[!(image_cnt_ & 1)]
 
 void GridMap::initMap(rclcpp::Node::SharedPtr node)
 {
   node_ = node;
+  tf_buffer_ = std::make_shared<tf2_ros::Buffer>(node_->get_clock());
+  tf_listener_ = std::make_shared<tf2_ros::TransformListener>(*tf_buffer_, node_);
 
   /* get parameter */
   double x_size, y_size, z_size;
@@ -41,7 +46,10 @@ void GridMap::initMap(rclcpp::Node::SharedPtr node)
   node_->declare_parameter("grid_map/virtual_ceil_yn", -0.1);
   node_->declare_parameter("grid_map/show_occ_time", false);
   node_->declare_parameter("grid_map/pose_type", 1);
-  node_->declare_parameter("grid_map/frame_id", "world");
+  if (!node_->has_parameter("grid_map/frame_id"))
+  {
+    node_->declare_parameter("grid_map/frame_id", "map");
+  }
   node_->declare_parameter("grid_map/local_map_margin", 1);
   node_->declare_parameter("grid_map/ground_height", 1.0);
   node_->declare_parameter("grid_map/odom_depth_timeout", 1.0);
@@ -759,8 +767,8 @@ void GridMap::updateOccupancyCallback()
   md_.local_updated_ = false;
 }
 
-void GridMap::depthPoseCallback(const sensor_msgs::msg::Image::ConstPtr &img,
-                                const geometry_msgs::msg::PoseStamped::ConstPtr &pose)
+void GridMap::depthPoseCallback(const sensor_msgs::msg::Image::ConstSharedPtr &img,
+                                const geometry_msgs::msg::PoseStamped::ConstSharedPtr &pose)
 {
   /* get depth image */
   cv_bridge::CvImagePtr cv_ptr;
@@ -807,11 +815,33 @@ void GridMap::odomCallback(const nav_msgs::msg::Odometry::SharedPtr odom)
   md_.has_odom_ = true;
 }
 
-void GridMap::cloudCallback(const sensor_msgs::msg::PointCloud2::ConstPtr &img)
+void GridMap::cloudCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr &img)
 {
+  sensor_msgs::msg::PointCloud2 cloud_msg;
+  const auto &cloud_frame = img->header.frame_id;
+  if (!cloud_frame.empty() && cloud_frame != mp_.frame_id_)
+  {
+    try
+    {
+      auto transform = tf_buffer_->lookupTransform(mp_.frame_id_, cloud_frame, tf2::TimePointZero);
+      tf2::doTransform(*img, cloud_msg, transform);
+    }
+    catch (const tf2::TransformException &ex)
+    {
+      RCLCPP_WARN_THROTTLE(node_->get_logger(), *node_->get_clock(), 2000,
+                           "Failed to transform cloud from '%s' to '%s': %s",
+                           cloud_frame.c_str(), mp_.frame_id_.c_str(), ex.what());
+      return;
+    }
+  }
+  else
+  {
+    cloud_msg = *img;
+    cloud_msg.header.frame_id = mp_.frame_id_;
+  }
 
   pcl::PointCloud<pcl::PointXYZ> latest_cloud;
-  pcl::fromROSMsg(*img, latest_cloud);
+  pcl::fromROSMsg(cloud_msg, latest_cloud);
 
   md_.has_cloud_ = true;
 
@@ -1032,7 +1062,7 @@ void GridMap::getRegion(Eigen::Vector3d &ori, Eigen::Vector3d &size)
   ori = mp_.map_origin_, size = mp_.map_size_;
 }
 
-void GridMap::extrinsicCallback(const nav_msgs::msg::Odometry::ConstPtr &odom)
+void GridMap::extrinsicCallback(const nav_msgs::msg::Odometry::ConstSharedPtr &odom)
 {
   Eigen::Quaterniond cam2body_q = Eigen::Quaterniond(odom->pose.pose.orientation.w,
                                                      odom->pose.pose.orientation.x,
@@ -1046,8 +1076,8 @@ void GridMap::extrinsicCallback(const nav_msgs::msg::Odometry::ConstPtr &odom)
   md_.cam2body_(3, 3) = 1.0;
 }
 
-void GridMap::depthOdomCallback(const sensor_msgs::msg::Image::ConstPtr &img,
-                                const nav_msgs::msg::Odometry::ConstPtr &odom)
+void GridMap::depthOdomCallback(const sensor_msgs::msg::Image::ConstSharedPtr &img,
+                                const nav_msgs::msg::Odometry::ConstSharedPtr &odom)
 {
   /* get pose */
   Eigen::Quaterniond body_q = Eigen::Quaterniond(odom->pose.pose.orientation.w,

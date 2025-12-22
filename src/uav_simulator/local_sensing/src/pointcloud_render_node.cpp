@@ -12,10 +12,13 @@
 #include <fstream>
 #include <iostream>
 #include <pcl/search/impl/kdtree.hpp>
+#include <string>
 #include <vector>
 
 using namespace std;
 using namespace Eigen;
+
+std::string frame_id = "map";
 
 // ROS2 初始化节点
 rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pub_cloud;
@@ -158,7 +161,7 @@ void renderSensedPoints(/*const rclcpp::TimerBase event*/) {
   _local_map.is_dense = true;
 
   pcl::toROSMsg(_local_map, _local_map_pcd);
-  _local_map_pcd.header.frame_id = "map";
+  _local_map_pcd.header.frame_id = frame_id;
 
   pub_cloud->publish(_local_map_pcd);
 }
@@ -183,6 +186,10 @@ int main(int argc, char** argv) {
   node->declare_parameter("map/x_size", 0.0);
   node->declare_parameter("map/y_size", 0.0);
   node->declare_parameter("map/z_size", 0.0);
+  if (!node->has_parameter("grid_map/frame_id"))
+  {
+    node->declare_parameter("grid_map/frame_id", "map");
+  }
 
   node->get_parameter("sensing_horizon", sensing_horizon);
   node->get_parameter("sensing_rate", sensing_rate);
@@ -190,6 +197,11 @@ int main(int argc, char** argv) {
   node->get_parameter("map/x_size", _x_size);
   node->get_parameter("map/y_size", _y_size);
   node->get_parameter("map/z_size", _z_size);
+  node->get_parameter("grid_map/frame_id", frame_id);
+  if (frame_id.empty())
+  {
+    frame_id = "map";
+  }
 
   // 订阅点云数据
   global_map_sub = node->create_subscription<sensor_msgs::msg::PointCloud2>(

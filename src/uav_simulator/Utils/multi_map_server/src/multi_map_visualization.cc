@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 #include <pose_utils/pose_utils.h>
 #include "rclcpp/rclcpp.hpp"
 #include <sensor_msgs/msg/point_cloud.hpp>
@@ -10,6 +11,7 @@
 
 rclcpp::Publisher<multi_map_server::msg::MultiOccupancyGrid>::SharedPtr pub1;
 rclcpp::Publisher<sensor_msgs::msg::PointCloud>::SharedPtr pub2;
+std::string frame_id = "map";
 
 vector<Map2D> maps2d;
 vector<geometry_msgs::msg::Pose> origins2d;
@@ -17,13 +19,14 @@ vector<Map3D> maps3d;
 vector<geometry_msgs::msg::Pose> origins3d;
 
 void maps2d_callback(const rclcpp::Clock::SharedPtr &clock,
-                     const multi_map_server::msg::MultiOccupancyGrid::ConstPtr &msg)
+                     const multi_map_server::msg::MultiOccupancyGrid::ConstSharedPtr &msg)
 {
     // Merge map
     maps2d.resize(msg->maps.size(), Map2D(4));
     for (unsigned int k = 0; k < msg->maps.size(); k++)
     {
         maps2d[k].SetClock(clock);
+        maps2d[k].SetFrameId(frame_id);
         maps2d[k].Replace(msg->maps[k]);
     }
     origins2d = msg->origins;
@@ -40,13 +43,14 @@ void maps2d_callback(const rclcpp::Clock::SharedPtr &clock,
 }
 
 void maps3d_callback(const rclcpp::Clock::SharedPtr &clock,
-                     const multi_map_server::msg::MultiSparseMap3D::ConstPtr &msg)
+                     const multi_map_server::msg::MultiSparseMap3D::ConstSharedPtr &msg)
 {
     // Update incremental map
     maps3d.resize(msg->maps.size());
     for (unsigned int k = 0; k < msg->maps.size(); k++)
     {
         maps3d[k].SetClock(clock);
+        maps3d[k].SetFrameId(frame_id);
         maps3d[k].UnpackMsg(msg->maps[k]);
     }
     origins3d = msg->origins;
@@ -79,7 +83,7 @@ void maps3d_callback(const rclcpp::Clock::SharedPtr &clock,
     }
     // Publish
     m.header.stamp = clock->now();
-    m.header.frame_id = string("/map");
+    m.header.frame_id = frame_id;
     pub2->publish(m);
 }
 
@@ -87,14 +91,23 @@ int main(int argc, char **argv)
 {
     rclcpp::init(argc, argv);
     auto node = std::make_shared<rclcpp::Node>("multi_map_visualization");
+    if (!node->has_parameter("grid_map/frame_id"))
+    {
+        node->declare_parameter("grid_map/frame_id", frame_id);
+    }
+    node->get_parameter("grid_map/frame_id", frame_id);
+    if (frame_id.empty())
+    {
+        frame_id = "map";
+    }
 
     auto clock = node->get_clock();
     auto sub1 = node->create_subscription<multi_map_server::msg::MultiOccupancyGrid>(
-        "dmaps2d", 1, [clock](const multi_map_server::msg::MultiOccupancyGrid::ConstPtr &msg) {
+        "dmaps2d", 1, [clock](const multi_map_server::msg::MultiOccupancyGrid::ConstSharedPtr &msg) {
           maps2d_callback(clock, msg);
         });
     auto sub2 = node->create_subscription<multi_map_server::msg::MultiSparseMap3D>(
-        "dmaps3d", 1, [clock](const multi_map_server::msg::MultiSparseMap3D::ConstPtr &msg) {
+        "dmaps3d", 1, [clock](const multi_map_server::msg::MultiSparseMap3D::ConstSharedPtr &msg) {
           maps3d_callback(clock, msg);
         });
 

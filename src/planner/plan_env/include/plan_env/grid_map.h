@@ -17,6 +17,8 @@
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/point_cloud2.hpp>
 #include <rclcpp/rclcpp.hpp>
+#include <tf2_ros/buffer.h>
+#include <tf2_ros/transform_listener.h>
 #include <tuple>
 #include <visualization_msgs/msg/marker.hpp>
 
@@ -211,11 +213,12 @@ private:
   MappingData md_;
 
   // get depth image and camera pose
-  void depthPoseCallback(const sensor_msgs::msg::Image::ConstPtr &img,
-                         const geometry_msgs::msg::PoseStamped::ConstPtr &pose);
-  void extrinsicCallback(const nav_msgs::msg::Odometry::ConstPtr &odom);
-  void depthOdomCallback(const sensor_msgs::msg::Image::ConstPtr &img, const nav_msgs::msg::Odometry::ConstPtr &odom);
-  void cloudCallback(const sensor_msgs::msg::PointCloud2::ConstPtr &img);
+  void depthPoseCallback(const sensor_msgs::msg::Image::ConstSharedPtr &img,
+                         const geometry_msgs::msg::PoseStamped::ConstSharedPtr &pose);
+  void extrinsicCallback(const nav_msgs::msg::Odometry::ConstSharedPtr &odom);
+  void depthOdomCallback(const sensor_msgs::msg::Image::ConstSharedPtr &img,
+                         const nav_msgs::msg::Odometry::ConstSharedPtr &odom);
+  void cloudCallback(const sensor_msgs::msg::PointCloud2::ConstSharedPtr &img);
   void odomCallback(const nav_msgs::msg::Odometry::SharedPtr odom);
 
   // update occupancy by raycasting
@@ -258,6 +261,9 @@ private:
 
   rclcpp::TimerBase::SharedPtr occ_timer_;
   rclcpp::TimerBase::SharedPtr vis_timer_;
+
+  std::shared_ptr<tf2_ros::Buffer> tf_buffer_;
+  std::shared_ptr<tf2_ros::TransformListener> tf_listener_;
 
   //
   uniform_real_distribution<double> rand_noise_;

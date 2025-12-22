@@ -57,15 +57,6 @@ def generate_launch_description():
     drone_id_arg = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
     topic_prefix_arg = DeclareLaunchArgument('topic_prefix', default_value=topic_prefix, description='Topic prefix for namespacing planner IO')
 
-    # Static TF from world -> map (identity)
-    static_tf = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_world_to_map',
-        arguments=['0', '0', '0', '0', '0', '0', 'world', 'map'],
-        output='screen',
-    )
-
     # Ego Planner Node
     ego_planner_node = Node(
         package='ego_planner',
@@ -143,7 +134,7 @@ def generate_launch_description():
             {'grid_map/visualization_truncate_height': 1.8},
             {'grid_map/show_occ_time': False},
             {'grid_map/pose_type': 1},
-            {'grid_map/frame_id': "world"},
+            {'grid_map/frame_id': "map"},
             # planner manager
             {'manager/max_vel': max_vel},
             {'manager/max_acc': max_acc},
@@ -203,7 +194,6 @@ def generate_launch_description():
 
 
     # Add Node
-    ld.add_action(static_tf)
     ld.add_action(ego_planner_node)
 
     return ld

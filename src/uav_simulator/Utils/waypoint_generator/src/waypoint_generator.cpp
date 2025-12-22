@@ -26,6 +26,15 @@ public:
 
         this->declare_parameter("waypoint_type", string("manual"));
         this->get_parameter("waypoint_type", waypoint_type);
+        if (!this->has_parameter("grid_map/frame_id"))
+        {
+            this->declare_parameter("grid_map/frame_id", "map");
+        }
+        this->get_parameter("grid_map/frame_id", frame_id_);
+        if (frame_id_.empty())
+        {
+            frame_id_ = "map";
+        }
 
         auto sub1 = this->create_subscription<nav_msgs::msg::Odometry>(
             "odom", 10, std::bind(&WaypointGenerator::odom_callback, this, std::placeholders::_1));
@@ -41,6 +50,7 @@ public:
 private:
     // 变量
     string waypoint_type = string("manual");
+    string frame_id_ = "map";
     bool is_odom_ready;
     nav_msgs::msg::Odometry odom;
     nav_msgs::msg::Path waypoints;
@@ -136,7 +146,7 @@ private:
 
     void publish_waypoints()
     {
-        waypoints.header.frame_id = std::string("world");
+        waypoints.header.frame_id = frame_id_;
         waypoints.header.stamp = this->now();
         pub1->publish(waypoints);
         geometry_msgs::msg::PoseStamped init_pose;
@@ -151,7 +161,7 @@ private:
     {
         nav_msgs::msg::Path wp_vis = waypoints;
         geometry_msgs::msg::PoseArray poseArray;
-        poseArray.header.frame_id = std::string("world");
+        poseArray.header.frame_id = frame_id_;
         poseArray.header.stamp = this->now();
 
         {
@@ -170,7 +180,7 @@ private:
     }
 
     // 回调函数
-    void odom_callback(const nav_msgs::msg::Odometry::ConstPtr &msg)
+    void odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr &msg)
     {
         is_odom_ready = true;
         odom = *msg;
@@ -203,7 +213,7 @@ private:
         }
     }
 
-    void goal_callback(const geometry_msgs::msg::PoseStamped::ConstPtr &msg)
+    void goal_callback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr &msg)
     {
         /*    if (!is_odom_ready) {
                 ROS_ERROR("[waypoint_generator] No odom!");

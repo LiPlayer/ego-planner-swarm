@@ -12,6 +12,7 @@
 #include <iostream>
 #include <Eigen/Eigen>
 #include <random>
+#include <string>
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -44,6 +45,7 @@ double _x_size, _y_size, _z_size;
 double _x_l, _x_h, _y_l, _y_h, _w_l, _w_h, _h_l, _h_h;
 double _z_limit, _sensing_range, _resolution, _sense_rate, _init_x, _init_y;
 double _min_dist;
+string frame_id = "map";
 
 bool _map_ok = false;
 bool _has_odom = false;
@@ -302,7 +304,7 @@ int i = 0;
 void pubSensedPoints() {
     // 将点云转换为 ROS2 消息格式并发布
     pcl::toROSMsg(cloudMap, globalMap_pcd);
-    globalMap_pcd.header.frame_id = "world";
+    globalMap_pcd.header.frame_id = frame_id;
     _all_map_pub->publish(globalMap_pcd);
 
     return; // 有这个return后续的代码都不会执行
@@ -340,7 +342,7 @@ void pubSensedPoints() {
     localMap.is_dense = true;
 
     pcl::toROSMsg(localMap, localMap_pcd);
-    localMap_pcd.header.frame_id = "world";
+    localMap_pcd.header.frame_id = frame_id;
     _local_map_pub->publish(localMap_pcd);
 }
 
@@ -381,7 +383,7 @@ void clickCallback(const geometry_msgs::msg::PoseStamped &msg) {
     clicked_cloud_.is_dense = true;
 
     pcl::toROSMsg(clicked_cloud_, localMap_pcd);
-    localMap_pcd.header.frame_id = "world";
+    localMap_pcd.header.frame_id = frame_id;
     click_map_pub_->publish(localMap_pcd);
 
     cloudMap.width = cloudMap.points.size();
@@ -429,6 +431,10 @@ int main(int argc, char **argv)
     node->declare_parameter("sensing/radius", 10.0);
     node->declare_parameter("sensing/rate", 10.0);
     node->declare_parameter("min_distance", 1.0);
+    if (!node->has_parameter("grid_map/frame_id"))
+    {
+        node->declare_parameter("grid_map/frame_id", "map");
+    }
 
     node->get_parameter("init_state_x", _init_x);
     node->get_parameter("init_state_y", _init_y);
@@ -453,6 +459,11 @@ int main(int argc, char **argv)
     node->get_parameter("sensing/radius", _sensing_range);
     node->get_parameter("sensing/rate", _sense_rate);
     node->get_parameter("min_distance", _min_dist);
+    node->get_parameter("grid_map/frame_id", frame_id);
+    if (frame_id.empty())
+    {
+        frame_id = "map";
+    }
 
     // 地图边界和障碍物的设置
     _x_l = -_x_size / 2.0;

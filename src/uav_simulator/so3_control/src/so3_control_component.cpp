@@ -27,10 +27,10 @@ public:
 
 private:
     void publishSO3Command(void);
-    void position_cmd_callback(const quadrotor_msgs::msg::PositionCommand::ConstPtr &cmd);
-    void odom_callback(const nav_msgs::msg::Odometry::ConstPtr &odom);
-    void enable_motors_callback(const std_msgs::msg::Bool::ConstPtr &msg);
-    void corrections_callback(const quadrotor_msgs::msg::Corrections::ConstPtr &msg);
+    void position_cmd_callback(const quadrotor_msgs::msg::PositionCommand::ConstSharedPtr &cmd);
+    void odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr &odom);
+    void enable_motors_callback(const std_msgs::msg::Bool::ConstSharedPtr &msg);
+    void corrections_callback(const quadrotor_msgs::msg::Corrections::ConstSharedPtr &msg);
     void imu_callback(const sensor_msgs::msg::Imu &imu);
 
     SO3Control controller_;
@@ -94,7 +94,7 @@ void SO3ControlComponent::publishSO3Command(void)
     so3_command_pub_->publish(*so3_command);
 }
 
-void SO3ControlComponent::position_cmd_callback(const quadrotor_msgs::msg::PositionCommand::ConstPtr &cmd)
+void SO3ControlComponent::position_cmd_callback(const quadrotor_msgs::msg::PositionCommand::ConstSharedPtr &cmd)
 {
     // std::cout<< "SO3ControlComponent::cmd callback!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     des_pos_ = Eigen::Vector3d(cmd->position.x, cmd->position.y, cmd->position.z);
@@ -118,7 +118,7 @@ void SO3ControlComponent::position_cmd_callback(const quadrotor_msgs::msg::Posit
     publishSO3Command();
 }
 
-void SO3ControlComponent::odom_callback(const nav_msgs::msg::Odometry::ConstPtr &odom)
+void SO3ControlComponent::odom_callback(const nav_msgs::msg::Odometry::ConstSharedPtr &odom)
 {   
     // std::cout<< "SO3ControlComponent::odom_callback!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
     // std::cout<< "position_cmd_init_!!!!!!!!!!!!!!!!!!!!!!!" << position_cmd_init_ << std::endl;
@@ -169,7 +169,7 @@ void SO3ControlComponent::odom_callback(const nav_msgs::msg::Odometry::ConstPtr 
     }
 }
 
-void SO3ControlComponent::enable_motors_callback(const std_msgs::msg::Bool::ConstPtr &msg)
+void SO3ControlComponent::enable_motors_callback(const std_msgs::msg::Bool::ConstSharedPtr &msg)
 {
     if (msg->data)
         RCLCPP_INFO(this->get_logger(), "Enabling motors");
@@ -180,7 +180,7 @@ void SO3ControlComponent::enable_motors_callback(const std_msgs::msg::Bool::Cons
 }
 
 void SO3ControlComponent::corrections_callback(
-    const quadrotor_msgs::msg::Corrections::ConstPtr &msg)
+    const quadrotor_msgs::msg::Corrections::ConstSharedPtr &msg)
 {
     corrections_[0] = msg->kf_correction;
     corrections_[1] = msg->angle_corrections[0];

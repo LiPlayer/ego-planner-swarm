@@ -2,6 +2,7 @@
 #define MAP3D_H
 
 #include <iostream>
+#include <string>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -345,6 +346,11 @@ public:
     }
 
     void SetClock(const rclcpp::Clock::SharedPtr &clock) { clock_ = clock; }
+    void SetFrameId(const std::string &frame_id)
+    {
+        if (!frame_id.empty())
+            frame_id_ = frame_id;
+    }
     rclcpp::Time Now() const { return clock_ ? clock_->now() : rclcpp::Clock(RCL_ROS_TIME).now(); }
 
     ~Map3D()
@@ -363,7 +369,7 @@ public:
     {
         // Basic map info
         msg.header.stamp = Now();
-        msg.header.frame_id = string("/map");
+        msg.header.frame_id = frame_id_;
         msg.info.map_load_time = Now();
         msg.info.resolution = resolution;
         msg.info.origin.position.x = originX;
@@ -602,6 +608,7 @@ private:
     int logOddFreeThr;
     int logOddFreeFixedThr;
 
+    std::string frame_id_ = "map";
     bool updated;
     int updateCounter;
     vector<OccupancyGridList *> updateList;

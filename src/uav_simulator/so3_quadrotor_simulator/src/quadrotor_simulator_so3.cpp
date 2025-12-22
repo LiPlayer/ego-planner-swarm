@@ -172,7 +172,7 @@ getControl(const QuadrotorSimulator::Quadrotor &quad, const Command &cmd)
 }
 
 static void
-cmd_callback(const quadrotor_msgs::msg::SO3Command::ConstPtr &cmd)
+cmd_callback(const quadrotor_msgs::msg::SO3Command::ConstSharedPtr &cmd)
 {
     command.force[0] = cmd->force.x;
     command.force[1] = cmd->force.y;
@@ -195,7 +195,7 @@ cmd_callback(const quadrotor_msgs::msg::SO3Command::ConstPtr &cmd)
 }
 
 static void
-force_disturbance_callback(const geometry_msgs::msg::Vector3::ConstPtr &f)
+force_disturbance_callback(const geometry_msgs::msg::Vector3::ConstSharedPtr &f)
 {
     disturbance.f(0) = f->x;
     disturbance.f(1) = f->y;
@@ -203,7 +203,7 @@ force_disturbance_callback(const geometry_msgs::msg::Vector3::ConstPtr &f)
 }
 
 static void
-moment_disturbance_callback(const geometry_msgs::msg::Vector3::ConstPtr &m)
+moment_disturbance_callback(const geometry_msgs::msg::Vector3::ConstSharedPtr &m)
 {
     disturbance.m(0) = m->x;
     disturbance.m(1) = m->y;
@@ -279,6 +279,10 @@ int main(int argc, char **argv)
     node->declare_parameter("rate/simulation", 1000.0);
     node->declare_parameter("rate/odom", 100.0);
     node->declare_parameter("quadrotor_name", "quadrotor");
+    if (!node->has_parameter("grid_map/frame_id"))
+    {
+        node->declare_parameter("grid_map/frame_id", "map");
+    }
 
     QuadrotorSimulator::Quadrotor quad;
     double _init_x, _init_y, _init_z;
@@ -299,7 +303,13 @@ int main(int argc, char **argv)
     rclcpp::Duration odom_pub_duration(1.0 / odom_rate, 0);
 
     std::string quad_name;
+    std::string frame_id = "map";
     quad_name = node->get_parameter("quadrotor_name").as_string();
+    node->get_parameter("grid_map/frame_id", frame_id);
+    if (frame_id.empty())
+    {
+        frame_id = "map";
+    }
 
     QuadrotorSimulator::Quadrotor::State state = quad.getState();
 
@@ -309,7 +319,7 @@ int main(int argc, char **argv)
     Control control;
 
     nav_msgs::msg::Odometry odom_msg;
-    odom_msg.header.frame_id = "/world";
+    odom_msg.header.frame_id = frame_id;
     odom_msg.child_frame_id = "/" + quad_name;
 
     sensor_msgs::msg::Imu imu;

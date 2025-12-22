@@ -68,16 +68,16 @@ namespace detect
 
     // subscribe callback function
     void rcvDepthColorCamPoseCallback(
-        const sensor_msgs::msg::Image::ConstPtr &depth_img,
-        const sensor_msgs::msg::Image::ConstPtr &color_img,
-        const geometry_msgs::msg::PoseStamped::ConstPtr &camera_pose);
+        const sensor_msgs::msg::Image::ConstSharedPtr &depth_img,
+        const sensor_msgs::msg::Image::ConstSharedPtr &color_img,
+        const geometry_msgs::msg::PoseStamped::ConstSharedPtr &camera_pose);
 
     void rcvDepthCamPoseCallback(
-        const sensor_msgs::msg::Image::ConstPtr &depth_img,
+        const sensor_msgs::msg::Image::ConstSharedPtr &depth_img,
         const geometry_msgs::msg::PoseStamped::ConstSharedPtr &camera_pose);
 
     void rcvMyOdomCallback(const nav_msgs::msg::Odometry &odom);
-    void rcvDepthImgCallback(const sensor_msgs::msg::Image::ConstPtr &depth_img);
+    void rcvDepthImgCallback(const sensor_msgs::msg::Image::ConstSharedPtr &depth_img);
 
     void rcvDroneOdomCallbackBase(const nav_msgs::msg::Odometry &odom, const int drone_id);
 

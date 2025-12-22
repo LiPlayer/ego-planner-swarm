@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <string>
 
 #include <pcl/kdtree/kdtree_flann.h>
 #include <pcl/point_cloud.h>
@@ -52,7 +53,7 @@ optimizeMap(mocka::Maps::BasicInfo& in)
   in.cloud->width -= temp->size();
 
   pcl::toROSMsg(*in.cloud, *in.output);
-  in.output->header.frame_id = "world";
+  in.output->header.frame_id = in.frame_id.empty() ? "map" : in.frame_id;
   RCLCPP_INFO(rclcpp::get_logger("optimizeMap"), "finish: number of points after optimization %d", in.cloud->width);
   delete temp;
   return;
@@ -63,6 +64,7 @@ main(int argc, char** argv)
 {
   rclcpp::init(argc, argv);
   rclcpp::Node::SharedPtr node = std::make_shared<rclcpp::Node>("mockamap");
+  std::string frame_id = "map";
 
   // 创建一个 ROS2 发布者
   rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr pcl_pub =
@@ -91,6 +93,10 @@ main(int argc, char** argv)
   node->declare_parameter("y_length", 100);
   node->declare_parameter("z_length", 10);
   node->declare_parameter("type", 3);
+  if (!node->has_parameter("grid_map/frame_id"))
+  {
+    node->declare_parameter("grid_map/frame_id", "map");
+  }
 
   node->get_parameter("seed", seed);
   node->get_parameter("update_freq", update_freq);
@@ -99,6 +105,11 @@ main(int argc, char** argv)
   node->get_parameter("y_length", sizeY);
   node->get_parameter("z_length", sizeZ);
   node->get_parameter("type", type);
+  node->get_parameter("grid_map/frame_id", frame_id);
+  if (frame_id.empty())
+  {
+    frame_id = "map";
+  }
 
   // 调整尺寸和分辨率
   scale = 1 / scale;
@@ -114,6 +125,7 @@ main(int argc, char** argv)
   info.sizeZ      = sizeZ;
   info.seed       = seed;
   info.scale      = scale;
+  info.frame_id   = frame_id;
   info.output     = &output;
   info.cloud      = &cloud;
 

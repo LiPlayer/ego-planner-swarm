@@ -20,6 +20,8 @@ find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(cv_bridge REQUIRED)
 find_package(message_filters REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
 
 find_package(OpenCV REQUIRED)
 find_package(Eigen3 REQUIRED)
@@ -49,6 +51,7 @@ include_directories(
 link_directories(${PCL_LIBRARY_DIRS})
 
 ament_export_include_directories(include)
+ament_export_dependencies(tf2_ros tf2_sensor_msgs)
 
 add_library( plan_env SHARED
     src/grid_map.cpp 
@@ -56,7 +59,7 @@ add_library( plan_env SHARED
     src/obj_predictor.cpp 
     )
 
-ament_target_dependencies(plan_env std_msgs visualization_msgs geometry_msgs nav_msgs sensor_msgs rclcpp Eigen3 PCL cv_bridge message_filters pcl_conversions)
+ament_target_dependencies(plan_env std_msgs visualization_msgs geometry_msgs nav_msgs sensor_msgs rclcpp Eigen3 PCL cv_bridge message_filters pcl_conversions tf2_ros tf2_sensor_msgs)
 
 target_link_libraries( plan_env 
   ${PCL_LIBRARIES}

@@ -2,6 +2,7 @@
 #define MAP2D_H
 
 #include <iostream>
+#include <string>
 #include <rclcpp/rclcpp.hpp>
 #include <tf2/LinearMath/Quaternion.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
@@ -19,6 +20,7 @@ private:
     bool isBinningSet;
     bool updated;
     rclcpp::Clock::SharedPtr clock_;
+    std::string frame_id_ = "map";
 
 public:
     Map2D()
@@ -62,6 +64,11 @@ public:
     }
 
     void SetClock(const rclcpp::Clock::SharedPtr &clock) { clock_ = clock; }
+    void SetFrameId(const std::string &frame_id)
+    {
+        if (!frame_id.empty())
+            frame_id_ = frame_id;
+    }
     rclcpp::Time Now() const { return clock_ ? clock_->now() : rclcpp::Clock(RCL_ROS_TIME).now(); }
 
     // Get occupancy value, 0: unknown; +ve: occupied; -ve: free
@@ -250,7 +257,7 @@ public:
     {
         map.header.stamp = Now();
         map.info.map_load_time = Now();
-        map.header.frame_id = string("/map");
+        map.header.frame_id = frame_id_;
         updated = false;
         return map;
     }

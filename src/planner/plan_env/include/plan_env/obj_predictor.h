@@ -125,7 +125,7 @@ namespace fast_planner
     void init(int id, int skip_num, int queue_size, rclcpp::Time global_start_time,
               const rclcpp::Clock::SharedPtr &clock);
 
-    void poseCallback(const geometry_msgs::msg::PoseStamped::ConstPtr &msg);
+    void poseCallback(const geometry_msgs::msg::PoseStamped::ConstSharedPtr &msg);
 
     void clear()
     {
@@ -162,7 +162,7 @@ namespace fast_planner
     ObjScale obj_scale_;
     vector<bool> scale_init_;
 
-    void markerCallback(const visualization_msgs::msg::Marker::ConstPtr &msg);
+    void markerCallback(const visualization_msgs::msg::Marker::ConstSharedPtr &msg);
 
     void predictCallback(); // ROS2 的定时器回调不需要 TimerEvent
     void predictPolyFit();

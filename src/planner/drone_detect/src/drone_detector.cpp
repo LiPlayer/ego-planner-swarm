@@ -176,7 +176,7 @@ namespace detect
     // publish transform from world frame to quadrotor frame.
   }
 
-  void DroneDetector::rcvDepthImgCallback(const sensor_msgs::msg::Image::ConstPtr &depth_img)
+  void DroneDetector::rcvDepthImgCallback(const sensor_msgs::msg::Image::ConstSharedPtr &depth_img)
   {
     /* 获取深度图像 */
     cv_bridge::CvImagePtr cv_ptr;

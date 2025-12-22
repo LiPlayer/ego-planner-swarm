@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <string>
 
 // ROS2 依赖项
 #include "rclcpp/rclcpp.hpp"
@@ -49,6 +50,7 @@ using namespace Eigen;
 
 int *depth_hostptr;
 cv::Mat depth_mat;
+std::string frame_id = "map";
 
 int width, height;
 double fx, fy, cx, cy;
@@ -169,7 +171,7 @@ void pubCameraPose()
 {
   geometry_msgs::msg::PoseStamped camera_pose;
   camera_pose.header = _odom.header;
-  camera_pose.header.frame_id = "map";  
+  camera_pose.header.frame_id = frame_id;
   camera_pose.pose.position.x = cam2world(0, 3);
   camera_pose.pose.position.y = cam2world(1, 3);
   camera_pose.pose.position.z = cam2world(2, 3);
@@ -302,7 +304,7 @@ void render_pcl_world()
     // 信息格式转换
     sensor_msgs::msg::PointCloud2 local_map_pcl;
     pcl::toROSMsg(localMap, local_map_pcl);
-    local_map_pcl.header.frame_id = "/map";
+    local_map_pcl.header.frame_id = frame_id;
     local_map_pcl.header.stamp = last_odom_stamp; // 使用当前时间戳
 
     // 发布点云
@@ -384,6 +386,10 @@ int main(int argc, char **argv) {
   node->declare_parameter("map/x_size", 10.0);
   node->declare_parameter("map/y_size", 10.0);
   node->declare_parameter("map/z_size", 10.0);
+  if (!node->has_parameter("grid_map/frame_id"))
+  {
+    node->declare_parameter("grid_map/frame_id", "map");
+  }
 
   // Get parameters
   node->get_parameter("cam_width", width);
@@ -398,6 +404,11 @@ int main(int argc, char **argv) {
   node->get_parameter("map/x_size", _x_size);
   node->get_parameter("map/y_size", _y_size);
   node->get_parameter("map/z_size", _z_size);
+  node->get_parameter("grid_map/frame_id", frame_id);
+  if (frame_id.empty())
+  {
+    frame_id = "map";
+  }
 
   std::cout<< "camera parameter" << fx << fy << cx << cy << width << height << std::endl;
   depthrender.set_para(fx, fy, cx, cy, width, height);

@@ -43,6 +43,7 @@ double _x_size, _y_size, _h_size, _vel, _yaw_dot, _acc_r1, _acc_r2, _acc_z, _sca
 rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr obj_pub;           // visualize marker
 vector<rclcpp::Publisher<geometry_msgs::msg::PoseStamped>::SharedPtr> pose_pubs; // obj pose (from optitrack)
 vector<LinearObjModel> obj_models;
+string frame_id = "map";
 
 random_device rd;
 default_random_engine eng(rd());
@@ -83,6 +84,10 @@ int main(int argc, char **argv)
   node->declare_parameter("obj_generator/scale2", 1.0);
   node->declare_parameter("obj_generator/interval", 100.0);
   node->declare_parameter("obj_generator/input_type", 1);
+  if (!node->has_parameter("grid_map/frame_id"))
+  {
+    node->declare_parameter("grid_map/frame_id", "map");
+  }
 
   node->get_parameter("obj_generator/obj_num", obj_num);
   node->get_parameter("obj_generator/x_size", _x_size);
@@ -97,6 +102,11 @@ int main(int argc, char **argv)
   node->get_parameter("obj_generator/scale2", _scale2);
   node->get_parameter("obj_generator/interval", _interval);
   node->get_parameter("obj_generator/input_type", _input_type);
+  node->get_parameter("grid_map/frame_id", frame_id);
+  if (frame_id.empty())
+  {
+    frame_id = "map";
+  }
 
   obj_pub = node->create_publisher<visualization_msgs::msg::Marker>("/dynamic/obj", 10);
   for (int i = 0; i < obj_num; ++i)
@@ -230,7 +240,7 @@ void visualizeObj(const rclcpp::Time &stamp, int id)
 
   /* ---------- rviz ---------- */
   visualization_msgs::msg::Marker mk;
-  mk.header.frame_id = "world";
+  mk.header.frame_id = frame_id;
   mk.header.stamp = stamp;
   mk.type = visualization_msgs::msg::Marker::CUBE;
   mk.action = visualization_msgs::msg::Marker::ADD;
@@ -250,7 +260,7 @@ void visualizeObj(const rclcpp::Time &stamp, int id)
 
   /* ---------- pose ---------- */
   geometry_msgs::msg::PoseStamped pose;
-  pose.header.frame_id = "world";
+  pose.header.frame_id = frame_id;
   // pose.header.seq = id;
   pose.pose.position.x = pos(0), pose.pose.position.y = pos(1), pose.pose.position.z = pos(2);
   pose.pose.orientation.w = 1.0;

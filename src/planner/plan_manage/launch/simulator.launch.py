@@ -27,6 +27,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     drone_id = LaunchConfiguration('drone_id', default=0)
     topic_prefix = LaunchConfiguration('topic_prefix', default='')
+    grid_map_frame_id = LaunchConfiguration('grid_map_frame_id', default='map')
 
     # DeclareLaunchArguments
     init_x_arg = DeclareLaunchArgument('init_x_', default_value=init_x, description='Initial X position')
@@ -43,6 +44,7 @@ def generate_launch_description():
     use_sim_time_arg = DeclareLaunchArgument('use_sim_time', default_value=use_sim_time, description='Use simulation time')
     drone_id_arg = DeclareLaunchArgument('drone_id', default_value=drone_id, description='Drone ID')
     topic_prefix_arg = DeclareLaunchArgument('topic_prefix', default_value=topic_prefix, description='Topic prefix for simulator IO (empty for no prefix)')
+    grid_map_frame_id_arg = DeclareLaunchArgument('grid_map_frame_id', default_value=grid_map_frame_id, description='Frame id for grid map and visualization')
     
     # 地图属性以及是否使用动力学仿真
     use_mockamap = LaunchConfiguration('use_mockamap', default=False) # map_generator or mockamap 
@@ -81,7 +83,8 @@ def generate_launch_description():
             {'ObstacleShape/theta': 0.5},
             {'sensing/radius': 5.0},
             {'sensing/rate': 10.0},
-            {'min_distance': min_dist}
+            {'min_distance': min_dist},
+            {'grid_map/frame_id': grid_map_frame_id}
         ],
         condition = UnlessCondition(use_mockamap)
     )
@@ -106,7 +109,8 @@ def generate_launch_description():
             {'complexity': 0.05},
             {'fill': 0.12},
             {'fractal': 1},
-            {'attenuation': 0.1}
+            {'attenuation': 0.1},
+            {'grid_map/frame_id': grid_map_frame_id}
         ],
         condition = IfCondition(use_mockamap)
     )
@@ -119,7 +123,8 @@ def generate_launch_description():
                     {'simulator/init_state_x': init_x},
                     {'simulator/init_state_y': init_y},
                     {'simulator/init_state_z': init_z},
-                    {'use_sim_time': use_sim_time}],
+                    {'use_sim_time': use_sim_time},
+                    {'grid_map/frame_id': grid_map_frame_id}],
         
         remappings=[('odom', [topic_prefix, 'visual_slam/odom']),
                     ('cmd', [topic_prefix, 'so3_cmd']),
@@ -185,7 +190,8 @@ def generate_launch_description():
             {'init_x': init_x},
             {'init_y': init_y},
             {'init_z': init_z},
-            {'use_sim_time': use_sim_time}
+            {'use_sim_time': use_sim_time},
+            {'grid_map/frame_id': grid_map_frame_id}
         ],
         remappings=[
             ('command', [topic_prefix, 'planning/position_cmd']),
@@ -220,7 +226,8 @@ def generate_launch_description():
             {'covariance_scale': 100.0},
             {'robot_scale': 1.0},
             {'tf45': False},
-            {'drone_id': drone_id}
+            {'drone_id': drone_id},
+            {'grid_map/frame_id': grid_map_frame_id}
         ]
     )
     
@@ -242,6 +249,7 @@ def generate_launch_description():
             {'map/x_size': map_size_x_},
             {'map/y_size': map_size_y_},
             {'map/z_size': map_size_z_},
+            {'grid_map/frame_id': grid_map_frame_id},
             camera_file
         ],
         remappings=[
@@ -270,6 +278,7 @@ def generate_launch_description():
     ld.add_action(drone_id_arg)
     ld.add_action(topic_prefix_arg)
     ld.add_action(use_sim_time_arg)
+    ld.add_action(grid_map_frame_id_arg)
     
     ld.add_action(use_mockamap_arg)
     ld.add_action(use_dynamic_arg)

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <math.h>
 #include <random>
+#include <string>
 #include <eigen3/Eigen/Dense>
 
 #include <rclcpp/rclcpp.hpp>
@@ -13,6 +14,7 @@ rclcpp::Subscription<quadrotor_msgs::msg::PositionCommand>::SharedPtr _cmd_sub;
 
 quadrotor_msgs::msg::PositionCommand _cmd;
 double init_x, init_y, init_z;
+std::string frame_id = "map";
 
 bool rcv_cmd = false;
 
@@ -28,7 +30,7 @@ void pubOdom(const rclcpp::Node::SharedPtr &node)
 {
     auto odom = nav_msgs::msg::Odometry();
     odom.header.stamp = node->now();
-    odom.header.frame_id = "world";
+    odom.header.frame_id = frame_id;
 
     if (rcv_cmd)
     {
@@ -99,9 +101,18 @@ int main(int argc, char *argv[])
     node->declare_parameter("init_x", 0.0);
     node->declare_parameter("init_y", 0.0);
     node->declare_parameter("init_z", 0.0);
+    if (!node->has_parameter("grid_map/frame_id"))
+    {
+        node->declare_parameter("grid_map/frame_id", "map");
+    }
     node->get_parameter("init_x", init_x);
     node->get_parameter("init_y", init_y);
     node->get_parameter("init_z", init_z);
+    node->get_parameter("grid_map/frame_id", frame_id);
+    if (frame_id.empty())
+    {
+        frame_id = "map";
+    }
 
     // 创建订阅者和发布者
     _cmd_sub = node->create_subscription<quadrotor_msgs::msg::PositionCommand>(

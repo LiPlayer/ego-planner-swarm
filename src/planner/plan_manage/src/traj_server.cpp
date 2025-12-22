@@ -13,6 +13,7 @@ rclcpp::Publisher<visualization_msgs::msg::Marker>::SharedPtr pos_cmd_vis_pub;
 quadrotor_msgs::msg::PositionCommand cmd;
 double pos_gain[3] = {0, 0, 0};
 double vel_gain[3] = {0, 0, 0};
+std::string frame_id = "map";
 
 using ego_planner::UniformBspline;
 
@@ -26,7 +27,7 @@ int traj_id_;
 double last_yaw_, last_yaw_dot_;
 double time_forward_;
 
-void bsplineCallback(traj_utils::msg::Bspline::ConstPtr msg)
+void bsplineCallback(traj_utils::msg::Bspline::ConstSharedPtr msg)
 {
   // parse pos traj
 
@@ -208,7 +209,7 @@ void cmdCallback(const rclcpp::Node::SharedPtr &node)
   time_last = time_now;
 
   cmd.header.stamp = time_now;
-  cmd.header.frame_id = "world";
+  cmd.header.frame_id = frame_id;
   cmd.trajectory_flag = quadrotor_msgs::msg::PositionCommand::TRAJECTORY_STATUS_READY;
   cmd.trajectory_id = traj_id_;
 
@@ -234,7 +235,7 @@ void cmdCallback(const rclcpp::Node::SharedPtr &node)
   // Visualize the current target position for RViz
   if (pos_cmd_vis_pub) {
     visualization_msgs::msg::Marker marker;
-    marker.header.frame_id = "world";
+    marker.header.frame_id = frame_id;
     marker.header.stamp = time_now;
     marker.ns = "position_cmd";
     marker.id = 0;
@@ -259,6 +260,15 @@ int main(int argc, char **argv)
 {
   rclcpp::init(argc, argv);
   auto node = rclcpp::Node::make_shared("traj_server");
+  if (!node->has_parameter("grid_map/frame_id"))
+  {
+    node->declare_parameter("grid_map/frame_id", "map");
+  }
+  node->get_parameter("grid_map/frame_id", frame_id);
+  if (frame_id.empty())
+  {
+    frame_id = "map";
+  }
 
   auto bspline_sub = node->create_subscription<traj_utils::msg::Bspline>(
       "planning/bspline",

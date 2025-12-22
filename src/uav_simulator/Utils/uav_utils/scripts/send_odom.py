@@ -12,11 +12,15 @@ if __name__ == "__main__":
     # 初始化 ROS 2 节点
     rclpy.init()
     node = rclpy.create_node("odom_sender")
+    node.declare_parameter("grid_map/frame_id", "map")
+    frame_id = node.get_parameter("grid_map/frame_id").value
+    if not frame_id:
+        frame_id = "map"
 
     # 创建消息对象
     msg = Odometry()
     msg.header.stamp = node.get_clock().now().to_msg()  # ROS 2 中的时间戳
-    msg.header.frame_id = "world"
+    msg.header.frame_id = frame_id
 
     # 生成四元数
     q = tfs.quaternion_from_euler(0, 0, 0, "rzyx")
