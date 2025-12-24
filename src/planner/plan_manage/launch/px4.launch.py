@@ -17,7 +17,7 @@ def generate_launch_description():
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
     odom_topic = LaunchConfiguration('odom_topic', default='/odometry/imu')
-    cloud_topic = LaunchConfiguration('cloud_topic', default='/lio_sam/mapping/cloud_registered')
+    cloud_topic = LaunchConfiguration('cloud_topic', default='/lio_sam/mapping/map_local')
     camera_pose_topic = LaunchConfiguration('camera_pose_topic', default='camera_pose')
     depth_topic = LaunchConfiguration('depth_topic', default='depth_image')
 
