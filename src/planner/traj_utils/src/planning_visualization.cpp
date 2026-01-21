@@ -34,10 +34,16 @@ namespace ego_planner
       pt.x = list[i](0);
       pt.y = list[i](1);
       pt.z = list[i](2);
-      // if (show_sphere) sphere.points.push_back(pt);
+      if (show_sphere)
+      {
+        sphere.points.push_back(pt);
+      }
       line_strip.points.push_back(pt);
     }
-    // if (show_sphere) pub.publish(sphere);
+    if (show_sphere)
+    {
+      pub->publish(sphere);
+    }
     pub->publish(line_strip);
   }
 
@@ -152,7 +158,7 @@ namespace ego_planner
     }
 
     Eigen::Vector4d color(0, 0.5, 0.5, 1);
-    displayMarkerList(global_list_pub, init_pts, scale, color, id);
+    displayMarkerList(global_list_pub, init_pts, scale, color, id, false);
   }
 
   void PlanningVisualization::displayMultiInitPathList(vector<vector<Eigen::Vector3d>> init_trajs, const double scale)
@@ -192,7 +198,7 @@ namespace ego_planner
     }
 
     Eigen::Vector4d color(0, 0, 1, 1);
-    displayMarkerList(init_list_pub, init_pts, scale, color, id);
+    displayMarkerList(init_list_pub, init_pts, scale, color, id, false);
   }
 
   void PlanningVisualization::displayOptimalList(Eigen::MatrixXd optimal_pts, int id)
@@ -235,7 +241,7 @@ namespace ego_planner
         list.push_back(pt);
       }
       // Eigen::Vector4d color(0.5,0.5,0,1);
-      displayMarkerList(a_star_list_pub, list, scale, color, id + i); // real ids used: [ id ~ id+a_star_paths.size() ]
+    displayMarkerList(a_star_list_pub, list, scale, color, id + i, false); // real ids used: [ id ~ id+a_star_paths.size() ]
       i++;
     }
   }
